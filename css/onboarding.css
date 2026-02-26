@@ -1,0 +1,154 @@
+.onboarding-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 40px;
+}
+
+.onboarding-box {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.onboarding-box h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #1c0c3b;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.onboarding-box p {
+    text-align: center;
+    color: #666;
+    font-size: 1.1em;
+    margin-bottom: 40px;
+}
+
+.niveis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.nivel-option {
+    display: none;
+}
+
+.nivel-option:checked + .nivel-card {
+    border: 3px solid #1c0c3b;
+    background: linear-gradient(135deg, #c4b5fd 0%, #e9e5ff 100%);
+    transform: scale(1.05);
+}
+
+.nivel-card {
+    background: #f8f7ff;
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nivel-card:hover {
+    border-color: #c4b5fd;
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(196, 181, 253, 0.3);
+}
+
+.nivel-icon {
+    font-size: 3em;
+    margin-bottom: 15px;
+    color: #1c0c3b;
+}
+
+.nivel-card h3 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #1c0c3b;
+    margin: 0 0 10px 0;
+}
+
+.nivel-card p {
+    font-size: 0.9em;
+    color: #666;
+    margin: 0;
+    text-align: left;
+}
+
+.nivel-card ul {
+    text-align: left;
+    margin: 15px 0 0 0;
+    padding-left: 20px;
+    font-size: 0.85em;
+    color: #666;
+}
+
+.nivel-card li {
+    margin: 5px 0;
+}
+
+.btn-continuar {
+    width: 100%;
+    padding: 18px;
+    background-color: #1c0c3b;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1em;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin-top: 20px;
+}
+
+.btn-continuar:hover:not(:disabled) {
+    background-color: #2d1a4f;
+    transform: translateY(-2px);
+}
+
+.btn-continuar:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.mensagem {
+    text-align: center;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.mensagem.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+@media (max-width: 768px) {
+    .onboarding-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .onboarding-box {
+        padding: 25px;
+    }
+
+    .onboarding-box h1 {
+        font-size: 2em;
+    }
+
+    .niveis-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

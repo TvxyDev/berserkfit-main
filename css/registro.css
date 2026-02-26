@@ -1,0 +1,34 @@
+.input-group select {
+  width: 100%;
+  padding: 12px 0;
+  box-sizing: border-box;
+  border: none;
+  border-bottom: 1px solid var(--cor-input-borda, #ccc);
+  background-color: transparent;
+  color: var(--cor-texto-login, #333);
+  font-size: 1em;
+  font-family: "Inter", sans-serif;
+  transition: border-color 0.3s ease;
+  cursor: pointer;
+}
+
+.input-group select:focus {
+  outline: none;
+  border-bottom-color: var(--cor-destaque, #0078d7);
+}
+
+.input-group select option {
+  background-color: var(--cor-fundo-login, #fff);
+  color: var(--cor-texto-login, #333);
+}
+
+.senha-error {
+  color: red;
+  font-size: 0.85em;
+  margin-top: 5px;
+  display: none;
+}
+
+.senha-error.show {
+  display: block;
+}

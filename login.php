@@ -1,0 +1,162 @@
+<?php
+session_start();
+require_once 'config_google.php';
+
+$mensagem = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Conexão
+    require 'ligacao.php';
+
+    // Pega dados do formulário
+    $email = $_POST['email'];
+    $senha = $_POST['senha'];
+
+    // Prepara SQL para buscar o utilizador
+    $sql = "SELECT id_user, nome, email, password_hash FROM user WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows == 1) {
+        $user = $result->fetch_assoc();
+
+        // Verifica a senha
+        if (password_verify($senha, $user['password_hash'])) {
+            // Verificar se o utilizador tem 2FA ativo
+            $sql_2fa = "SELECT tfa_secret FROM user WHERE id_user = ?";
+            $stmt_2fa = $conn->prepare($sql_2fa);
+            $stmt_2fa->bind_param("i", $user['id_user']);
+            $stmt_2fa->execute();
+            $result_2fa = $stmt_2fa->get_result();
+            $row_2fa = $result_2fa->fetch_assoc();
+            $stmt_2fa->close();
+
+            // Se tem 2FA ativo, redireciona para login_2fa.php
+            if (!empty($row_2fa['tfa_secret'])) {
+                $_SESSION['tfa_user_id'] = $user['id_user'];
+                $_SESSION['tfa_username'] = $user['nome'];
+                header("Location: login_2fa.php");
+                exit;
+            }
+
+            // Buscar tipo de utilizador
+            $sql_tipo = "SELECT COALESCE(tipo_usuario, 'Usuario') as tipo_usuario FROM user WHERE id_user = ?";
+            $stmt_tipo = $conn->prepare($sql_tipo);
+            $stmt_tipo->bind_param("i", $user['id_user']);
+            $stmt_tipo->execute();
+            $result_tipo = $stmt_tipo->get_result();
+            $tipo_usuario = 'Usuario';
+            if ($row_tipo = $result_tipo->fetch_assoc()) {
+                $tipo_usuario = $row_tipo['tipo_usuario'] ?? 'Usuario';
+            }
+            $stmt_tipo->close();
+
+            // Login bem-sucedido
+            $_SESSION['user_id'] = $user['id_user'];
+            $_SESSION['user_nome'] = $user['nome'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_tipo'] = $tipo_usuario;
+
+            // Verifica se é o primeiro login (não tem hábitos criados)
+            $sql_check = "SELECT COUNT(*) as total FROM habito WHERE id_user = ?";
+            $stmt_check = $conn->prepare($sql_check);
+            $stmt_check->bind_param("i", $user['id_user']);
+            $stmt_check->execute();
+            $result_check = $stmt_check->get_result();
+            $row_check = $result_check->fetch_assoc();
+            $stmt_check->close();
+
+            // Se não tem hábitos, redireciona para onboarding
+            if ($row_check['total'] == 0) {
+                header("Location: onboarding.php");
+            } else {
+                header("Location: dashboard.php");
+            }
+            exit;
+        } else {
+            $mensagem = "❌ Email ou palavra-passe incorretos!";
+        }
+    } else {
+        $mensagem = "❌ Email ou palavra-passe incorretos!";
+    }
+
+    $stmt->close();
+    $conn->close();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BerserkFit</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/estilo.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Inter:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="login-page">
+    <header>
+        <nav>
+            <div class="logotipo">
+                <img src="assets/logotipo1.png" alt="Logótipo BerserkFit">
+            </div>
+            <ul>
+                <li><a href="index.php#inicio">Início</a></li>
+                <li><a href="index.php#funcionalidades">Funcionalidades</a></li>
+                <li><a href="index.php#planos">Planos</a></li>
+                <li><a href="index.php#sobre">Sobre</a></li>
+                <li><a href="index.php#depoimentos">Testemunhos</a></li>
+                <li><a href="index.php#contato">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-login">
+        <div class="floating-icons-container">
+            <i class="fa-solid fa-dumbbell floating-icon" style="--i:1"></i>
+            <i class="fa-solid fa-heart floating-icon" style="--i:2"></i>
+            <i class="fa-solid fa-person-running floating-icon" style="--i:3"></i>
+            <i class="fa-solid fa-bicycle floating-icon" style="--i:4"></i>
+            <i class="fa-solid fa-medal floating-icon" style="--i:5"></i>
+            <i class="fa-solid fa-fire-flame-simple floating-icon" style="--i:6"></i>
+        </div>
+        <div class="login-container">
+            <div class="login-box">
+                <h1>Bem-vindo de volta!</h1>
+                <?php if ($mensagem != ""): ?>
+                    <p class="mensagem" style="text-align: center; margin-bottom: 15px; color: red;">
+                        <?php echo $mensagem; ?>
+                    </p>
+                <?php endif; ?>
+                <form method="POST" action="login.php">
+                    <div class="input-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="senha">Palavra-passe</label>
+                        <input type="password" id="senha" name="senha" required>
+                    </div>
+                    <a href="#" class="forgot-password">Esqueceu-se da palavra-passe?</a>
+                    <button type="submit" class="btn-signin">Entrar</button>
+                    <button type="button" class="btn-google"
+                        onclick="window.location.href='<?php echo $client->createAuthUrl(); ?>'">
+                        <img src="assets/google-icon.svg" alt="Google Icon"> Entrar com o Google
+                    </button>
+                </form>
+                <p class="signup-link">Não tem conta? <a href="registro.php">Criar conta</a></p>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
