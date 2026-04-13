@@ -9,7 +9,7 @@ const sendBtn = document.getElementById('send-btn');
 const typingIndicator = document.getElementById('typing-indicator');
 
 // API Key do Google Gemini
-const API_KEY = 'AIzaSyD3f9wqJc6NxZ4QNdKO_vxZVPt5VEk-lCI';
+const API_KEY = 'x';
 
 // Histórico da conversa para manter contexto
 let conversationHistory = [
