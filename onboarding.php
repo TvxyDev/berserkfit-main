@@ -27,6 +27,24 @@ if ($row['total'] > 0) {
     exit;
 }
 
+// Processar pular etapa (adiciona um hábito padrão e redireciona)
+if (isset($_GET['skip'])) {
+    $descricao_default = 'Explorar o BerserkFit';
+    $tipo_default = 'Geral';
+    $meta_default = 1.0;
+
+    $sql_insert = "INSERT INTO habito (id_user, descricao, tipo, meta_diaria) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql_insert);
+    if ($stmt) {
+        $stmt->bind_param("issd", $user_id, $descricao_default, $tipo_default, $meta_default);
+        $stmt->execute();
+        $stmt->close();
+    }
+    header("Location: dashboard.php");
+    exit;
+}
+
+
 // Processar seleção de nível
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nivel = $_POST['nivel'] ?? '';
@@ -142,9 +160,9 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bem-vindo - BerserkFit</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/estilo.css">
-    <link rel="stylesheet" href="css/login.css">
-    <link rel="stylesheet" href="css/onboarding.css">
+    <link rel="stylesheet" href="css/estilo.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/login.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/onboarding.css?v=<?= time() ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Inter:wght@400;700&display=swap"
@@ -232,6 +250,12 @@ $conn->close();
                     <button type="submit" class="btn-continuar" id="btnContinuar" disabled>
                         Continuar
                     </button>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <a href="onboarding.php?skip=1" class="btn-onboarding-pular">
+                            Pular etapa <i class="fas fa-chevron-right" style="font-size: 0.85em; margin-left: 4px;"></i>
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>

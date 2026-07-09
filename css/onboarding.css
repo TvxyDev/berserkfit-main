@@ -1,15 +1,18 @@
 .onboarding-container {
-    max-width: 800px;
+    width: 100%;
+    max-width: 1200px;
     margin: 50px auto;
     padding: 40px;
 }
 
 .onboarding-box {
+    width: 100%;
     background: white;
     padding: 40px;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
 }
+
 
 .onboarding-box h1 {
     font-family: 'Poppins', sans-serif;
@@ -29,10 +32,11 @@
 
 .niveis-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
+    margin-bottom: 35px;
 }
+
 
 .nivel-option {
     display: none;
@@ -133,6 +137,13 @@
     border: 1px solid #f5c6cb;
 }
 
+@media (max-width: 1023px) {
+    .niveis-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
 @media (max-width: 768px) {
     .onboarding-container {
         margin: 20px;
@@ -146,9 +157,30 @@
     .onboarding-box h1 {
         font-size: 2em;
     }
+}
 
+@media (max-width: 580px) {
     .niveis-grid {
         grid-template-columns: 1fr;
     }
 }
+
+.btn-onboarding-pular {
+    display: inline-block;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.95em;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    padding: 8px 20px;
+    border-radius: 20px;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-onboarding-pular:hover {
+    color: #1c0c3b;
+    background: #f3f4f6;
+}
+
 

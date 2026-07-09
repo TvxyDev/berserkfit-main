@@ -4,6 +4,14 @@ require_once 'config_google.php';
 
 $mensagem = "";
 
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'login_required_checkout' || isset($_SESSION['redirect_checkout_plano'])) {
+        $mensagem = "ℹ️ Por favor, inicie sessão ou crie uma conta para subscrever o plano.";
+    } elseif ($_GET['msg'] === 'login_required_testimonial') {
+        $mensagem = "ℹ️ Por favor, inicie sessão ou crie uma conta para deixar o seu testemunho.";
+    }
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Conexão
     require 'ligacao.php';
@@ -95,8 +103,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - BerserkFit</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/estilo.css">
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/estilo.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/login.css?v=<?= time() ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Inter:wght@400;700&display=swap"
@@ -109,7 +117,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="logotipo">
                 <img src="assets/logotipo1.png" alt="Logótipo BerserkFit">
             </div>
-            <ul>
+            <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="menu-overlay" id="menuOverlay"></div>
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="index.php#inicio">Início</a></li>
                 <li><a href="index.php#funcionalidades">Funcionalidades</a></li>
                 <li><a href="index.php#planos">Planos</a></li>
@@ -157,6 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </main>
+    <script src="js/main.js"></script>
 </body>
 
 </html>

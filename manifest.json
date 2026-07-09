@@ -1,0 +1,22 @@
+{
+  "name": "BerserkFit",
+  "short_name": "BerserkFit",
+  "start_url": "index.php",
+  "display": "standalone",
+  "background_color": "#1c0c3b",
+  "theme_color": "#1c0c3b",
+  "orientation": "portrait",
+  "description": "A app de treino que acompanha a tua evolução.",
+  "icons": [
+    {
+      "src": "assets/logotipo1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logotipo1.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,473 @@
+.timer-container {
+    background: var(--bg-card);
+    border: 2px solid var(--primary-color);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(196, 181, 253, 0.3);
+}
+
+.timer-display {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--cor-destaque);
+    font-family: var(--fonte-titulo);
+    margin: 1rem 0;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.btn-timer {
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-start {
+    background: #10b981;
+    color: white;
+}
+
+.btn-pause {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-stop {
+    background: #ef4444;
+    color: white;
+}
+
+.exercicio-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.exercicio-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    transition: all 0.3s;
+    min-height: 110px;
+}
+
+.exercicio-card.concluido {
+    opacity: 0.55;
+    background: rgba(196, 181, 253, 0.08);
+    border-color: rgba(196, 181, 253, 0.3);
+}
+
+/* ─── Coluna da esquerda: GIF ─── */
+.exercicio-gif-col {
+    width: 110px;
+    min-width: 110px;
+    background: rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-right: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.exercicio-gif-inline {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    display: block;
+}
+
+.exercicio-gif-placeholder {
+    width: 110px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: rgba(196, 181, 253, 0.3);
+    animation: pulse-placeholder 1.8s ease-in-out infinite;
+    background: repeating-linear-gradient(
+        135deg,
+        rgba(196,181,253,0.04) 0px,
+        rgba(196,181,253,0.04) 2px,
+        transparent 2px,
+        transparent 12px
+    );
+}
+
+@keyframes pulse-placeholder {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 0.9; }
+}
+
+.exercicio-gif-yt {
+    width: 110px;
+    height: 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.exercicio-gif-yt:hover { background: rgba(255,0,0,0.15); }
+.exercicio-gif-yt i { font-size: 1.8rem; color: #ff4444; }
+
+.exercicio-info {
+    flex: 1;
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+.exercicio-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.exercicio-btns-row {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.exercicio-checkbox {
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+    flex-shrink: 0;
+    border-radius: 6px;
+}
+
+.exercicio-nome {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--cor-destaque);
+}
+
+.exercicio-detalhes {
+    color: var(--text-gray);
+    font-size: 0.82rem;
+}
+
+.progresso-treino {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.progresso-bar-container {
+    background: var(--cor-secundaria);
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progresso-bar-fill {
+    background: linear-gradient(90deg, var(--primary-dark), var(--primary-color));
+    height: 100%;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cor-destaque);
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* ═══ REGISTO DE SÉRIES ═══ */
+.btn-log-sets {
+    background: rgba(196, 181, 253, 0.08);
+    color: var(--cor-intermedia);
+    border: 1.5px solid rgba(196, 181, 253, 0.2);
+    padding: 0.7rem 1.2rem;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 10px rgba(196, 181, 253, 0.05);
+}
+
+.btn-log-sets:hover {
+    background: var(--cor-intermedia);
+    color: var(--cor-destaque);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(196, 181, 253, 0.2);
+}
+
+.btn-log-sets i {
+    font-size: 0.9rem;
+}
+
+/* ═══ MODAL BERSERK ═══ */
+.modal-berserk {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: rgba(8, 4, 20, 0.9); /* Um pouco mais escuro para destaque */
+    z-index: 100000; /* Superior à navbar (9999) */
+    align-items: center; 
+    justify-content: center;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    pointer-events: auto;
+}
+
+.modal-berserk.active { 
+    display: flex;
+    animation: modal-bg-fade 0.3s ease;
+}
+
+.modal-content {
+    background: #1c0c3b; 
+    width: 95%; 
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 28px; 
+    overflow: hidden;
+    border: 1px solid rgba(196, 181, 253, 0.2);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    transform: translateZ(0);
+    pointer-events: auto !important;
+    animation: modal-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box; /* Garante que padding não quebra a largura */
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh; /* Evita que o modal passe do ecrã e tape o botão */
+}
+
+.modal-header {
+    padding: 24px 28px; 
+    border-bottom: 1px solid rgba(196, 181, 253, 0.08);
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    flex-shrink: 0; /* Impede o header de encolher */
+}
+
+.modal-header h3 { 
+    font-family: 'Syne', sans-serif; 
+    font-size: 1.15rem; 
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+}
+
+.modal-body { 
+    padding: 24px 28px; 
+    color: rgba(255, 255, 255, 0.9);
+    display: block !important; /* Desativar o grid global de 2 colunas */
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    overflow-y: auto; /* Permite fazer scroll nas séries se forem muitas */
+}
+
+.modal-footer {
+    padding: 16px 28px 28px 28px;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid rgba(196, 181, 253, 0.05);
+    flex-shrink: 0; /* Impede o rodapé/botão de encolher ou sumir */
+}
+
+/* Botão Guardar no Modal */
+.btn-save-modal {
+    background: linear-gradient(135deg, var(--cor-intermedia), var(--cor-destaque));
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+}
+
+.btn-save-modal:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+}
+
+/* Lista de Séries no Modal */
+.sets-modal-list { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 14px; 
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+.set-row-modal {
+    display: grid;
+    grid-template-columns: 100px 1fr 1fr;
+    align-items: flex-start; /* Alinhar ao topo para ancorar os labels */
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    width: 100% !important;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.set-num {
+    font-weight: 800;
+    color: var(--cor-intermedia);
+    font-size: 0.95rem;
+    margin-top: 32px; /* Ajustar para alinhar com o centro dos inputs */
+}
+
+.set-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.set-field label {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 !important;
+    line-height: 1.2;
+}
+
+.set-field input {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border: 2px solid var(--cor-intermedia);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 1.6rem !important;
+    font-weight: 800;
+    width: 100% !important;
+    height: 65px;
+    outline: none;
+    text-align: center;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+}
+
+/* Hide spin buttons */
+.set-field input::-webkit-outer-spin-button,
+.set-field input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+
+.set-field input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.set-field input:focus {
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(196, 181, 253, 0.3);
+}
+
+/* Animações */
+@keyframes modal-bg-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsividade Mobile para o Modal e Cards */
+@media (max-width: 480px) {
+    .exercicio-card {
+        flex-direction: row-reverse; /* GIF à direita */
+    }
+
+    .exercicio-gif-col {
+        border-right: none;
+        border-left: 1px solid var(--border-color);
+    }
+
+    .exercicio-info {
+        padding: 1rem;
+    }
+
+    .exercicio-nome {
+        font-size: 0.95rem;
+    }
+
+    .modal-content {
+        width: 98%;
+        border-radius: 20px 20px 0 0;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .modal-body {
+        padding: 15px 10px;
+    }
+    
+    .set-row-modal {
+        grid-template-columns: 70px 1fr 1fr;
+        gap: 8px;
+        padding: 12px 8px;
+        align-items: flex-start;
+    }
+    
+    .set-num {
+        font-size: 0.75rem;
+        margin-top: 28px;
+    }
+    
+    .set-field input {
+        height: 55px;
+        font-size: 1.3rem !important;
+        padding: 8px;
+    }
+    
+    .set-field label {
+        font-size: 0.6rem;
+    }
+}

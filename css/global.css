@@ -1,0 +1,265 @@
+/* BerserkFit - Sistema de Design Global (Dark Premium) */
+@import url('responsive.css');
+
+:root {
+    --cor-fundo: #f0eff8;
+    --cor-primaria: #ffffff;
+    --cor-secundaria: #ece9f7;
+    --cor-destaque: #1c0c3b;
+    --cor-destaque-escuro: #1c0c3b;
+    --cor-intermedia: #c4b5fd;
+    --cor-texto: #1f2937;
+    --cor-texto-claro: #f8f7ff;
+    --cor-amarela: #ffd700;
+    --fonte-texto: "Inter", sans-serif;
+    --fonte-titulo: "Syne", sans-serif;
+    /* Novas variáveis de apoio */
+    --cor-glass: rgba(255, 255, 255, 0.72);
+    --sombra-card: 0 2px 16px rgba(28, 12, 59, 0.09);
+    --cor-acento: #7c5cbf;
+
+    /* ALIASES DE COMPATIBILIDADE (Para evitar quebra de páginas antigas) */
+    --primary-color: var(--cor-intermedia);
+    --primary-dark: var(--cor-destaque);
+    --bg-dark: var(--cor-fundo);
+    --bg-card: var(--cor-primaria);
+    --text-light: var(--cor-texto);
+    --text-gray: #6b7280;
+    --border-color: var(--cor-secundaria);
+    --cor-destaque-claro: rgba(196, 181, 253, 0.15);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--fonte-texto);
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    margin: 0;
+    padding: 0 0 110px 0;
+    min-height: 100vh;
+}
+
+/* ══════════ HEADER ══════════ */
+header {
+    background: var(--cor-destaque);
+    border-bottom: none;
+    box-shadow: none;
+    padding: 22px 24px 28px;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+header::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(196, 181, 253, 0.12);
+    pointer-events: none;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: 30%;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(196, 181, 253, 0.07);
+    pointer-events: none;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 26px;
+    position: relative;
+    z-index: 2;
+}
+
+.header-top.centered {
+    justify-content: center;
+}
+
+.app-title {
+    font-family: var(--fonte-titulo);
+    font-size: 1.45em;
+    font-weight: 800;
+    margin: 0;
+    color: var(--cor-intermedia);
+    letter-spacing: -0.02em;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-admin {
+    color: #fca5a5;
+    text-decoration: none;
+    font-size: 0.78em;
+    font-weight: 600;
+    padding: 6px 14px;
+    background: rgba(220, 53, 69, 0.2);
+    border-radius: 20px;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    transition: background 0.25s;
+    letter-spacing: 0.02em;
+}
+
+.btn-admin:hover {
+    background: rgba(220, 53, 69, 0.35);
+}
+
+.streak-counter {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 216, 0, 0.12);
+    border: 1px solid rgba(255, 216, 0, 0.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9em;
+    color: #ffd700;
+    font-family: var(--fonte-texto);
+}
+
+.streak-counter .fa-fire {
+    color: #ff9900;
+    font-size: 0.9em;
+}
+
+.header-greeting {
+    position: relative;
+    z-index: 2;
+}
+
+.header-greeting h2 {
+    font-family: var(--fonte-titulo);
+    font-size: 1.9em;
+    font-weight: 800;
+    margin: 0;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.header-greeting p {
+    font-family: var(--fonte-texto);
+    font-size: 0.88em;
+    color: rgba(248, 247, 255, 0.55);
+    margin: 4px 0 0;
+    letter-spacing: 0.01em;
+}
+
+/* ══════════ NAVBAR ══════════ */
+.navbar {
+    position: fixed;
+    z-index: 9999; /* Aumentado para garantir que fica sobre tudo */
+    bottom: 16px;
+    left: 50% !important; /* Forçar centralização */
+    transform: translateX(-50%) !important;
+    display: flex;
+    background: var(--cor-destaque);
+    border-radius: 28px;
+    padding: 8px 12px;
+    box-shadow: 0 8px 32px rgba(28, 12, 59, 0.35);
+    width: calc(100% - 32px);
+    max-width: 420px;
+    justify-content: space-around;
+    gap: 4px;
+    border: 1px solid rgba(196, 181, 253, 0.12);
+    /* Garantir que não herda margens de containers pais */
+    margin: 0 !important;
+}
+
+.nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    padding: 9px 14px;
+    border-radius: 20px;
+    transition: background-color 0.2s, color 0.2s;
+    flex: 1;
+    min-width: 0;
+}
+
+.nav-link:hover {
+    background: rgba(196, 181, 253, 0.1);
+    color: #ffffff;
+}
+
+.nav-link.active {
+    background: var(--cor-intermedia);
+    color: var(--cor-destaque);
+}
+
+.nav-link .icon {
+    font-size: 1.2em;
+    margin-bottom: 2px;
+}
+
+.nav-link .text {
+    font-size: 0.65em;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+}
+
+/* Responsive Navbar */
+@media (max-width: 480px) {
+    .nav-link .text {
+        display: none;
+    }
+
+    .nav-link {
+        padding: 11px 10px;
+    }
+
+    header {
+        padding: 18px 16px 24px;
+    }
+
+    .header-greeting h2 {
+        font-size: 1.6em;
+    }
+}
+
+/* ══════════ OUTROS COMUNS ══════════ */
+main {
+    padding: 20px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.fade-in-element {
+    animation: fadeIn 0.6s ease both;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

@@ -1,0 +1,219 @@
+=== Lançamento de Broadcast em 2026-06-12 13:48:21 ===
+Assunto: teste1
+Mensagem: teste
+-----------------------------------------
+❌ Erro no envio para: Saude em sintonia (contato.saudeemsintonia@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: discord gg (discordggts8@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Hugo (victorhugoribeiro2609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: G (vitoriaribesantos@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: tsiuki sokosks (tsukisteam2609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Santos (victorhugoribeiro992609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: victor12 (victor123@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Pap Victor (papvictorsantos@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: VICTOR SANTOSPAP (PAP123@GMAIL.COM). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Santos (victor123pap1@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Papintermedia (papintermedia@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Berserk Fit (contato.berserkfit@gmail.com). Erro: SMTP Error: Could not authenticate.
+=== Lançamento de Broadcast em 2026-06-12 13:54:57 ===
+Assunto: teste1
+Mensagem: teste
+-----------------------------------------
+❌ Erro no envio para: Saude em sintonia (contato.saudeemsintonia@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: discord gg (discordggts8@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Hugo (victorhugoribeiro2609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: G (vitoriaribesantos@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: tsiuki sokosks (tsukisteam2609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Santos (victorhugoribeiro992609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: victor12 (victor123@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Pap Victor (papvictorsantos@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: VICTOR SANTOSPAP (PAP123@GMAIL.COM). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Santos (victor123pap1@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Papintermedia (papintermedia@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Berserk Fit (contato.berserkfit@gmail.com). Erro: SMTP Error: Could not authenticate.
+=== Lançamento de Broadcast em 2026-06-12 13:55:21 ===
+Assunto: teste
+Mensagem: teste11
+-----------------------------------------
+❌ Erro no envio para: Saude em sintonia (contato.saudeemsintonia@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: discord gg (discordggts8@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Hugo (victorhugoribeiro2609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: G (vitoriaribesantos@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: tsiuki sokosks (tsukisteam2609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Santos (victorhugoribeiro992609@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: victor12 (victor123@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Pap Victor (papvictorsantos@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: VICTOR SANTOSPAP (PAP123@GMAIL.COM). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Victor Santos (victor123pap1@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Papintermedia (papintermedia@gmail.com). Erro: SMTP Error: Could not authenticate.
+❌ Erro no envio para: Berserk Fit (contato.berserkfit@gmail.com). Erro: SMTP Error: Could not authenticate.
+=== Lançamento de Broadcast em 2026-06-12 14:03:50 ===
+Assunto: teste
+Mensagem: teste11
+-----------------------------------------
+✅ Enviado com PHPMailer para: Saude em sintonia (contato.saudeemsintonia@gmail.com)
+✅ Enviado com PHPMailer para: discord gg (discordggts8@gmail.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+✅ Enviado com PHPMailer para: G (vitoriaribesantos@gmail.com)
+✅ Enviado com PHPMailer para: tsiuki sokosks (tsukisteam2609@gmail.com)
+✅ Enviado com PHPMailer para: Victor Santos (victorhugoribeiro992609@gmail.com)
+✅ Enviado com PHPMailer para: victor12 (victor123@gmail.com)
+✅ Enviado com PHPMailer para: Pap Victor (papvictorsantos@gmail.com)
+✅ Enviado com PHPMailer para: VICTOR SANTOSPAP (PAP123@GMAIL.COM)
+✅ Enviado com PHPMailer para: Victor Santos (victor123pap1@gmail.com)
+✅ Enviado com PHPMailer para: Papintermedia (papintermedia@gmail.com)
+✅ Enviado com PHPMailer para: Berserk Fit (contato.berserkfit@gmail.com)
+=== Lançamento de Broadcast em 2026-06-12 14:04:10 ===
+Assunto: teteste
+Mensagem: teste1
+-----------------------------------------
+✅ Enviado com PHPMailer para: Saude em sintonia (contato.saudeemsintonia@gmail.com)
+✅ Enviado com PHPMailer para: discord gg (discordggts8@gmail.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+✅ Enviado com PHPMailer para: G (vitoriaribesantos@gmail.com)
+✅ Enviado com PHPMailer para: tsiuki sokosks (tsukisteam2609@gmail.com)
+✅ Enviado com PHPMailer para: Victor Santos (victorhugoribeiro992609@gmail.com)
+✅ Enviado com PHPMailer para: victor12 (victor123@gmail.com)
+✅ Enviado com PHPMailer para: Pap Victor (papvictorsantos@gmail.com)
+✅ Enviado com PHPMailer para: VICTOR SANTOSPAP (PAP123@GMAIL.COM)
+✅ Enviado com PHPMailer para: Victor Santos (victor123pap1@gmail.com)
+✅ Enviado com PHPMailer para: Papintermedia (papintermedia@gmail.com)
+✅ Enviado com PHPMailer para: Berserk Fit (contato.berserkfit@gmail.com)
+=== Lançamento de Broadcast em 2026-06-12 14:30:03 ===
+Filtro: todos (Dias: 7)
+Assunto: Queremos saber a sua opinião sobre o BerserkFit! ⭐
+Mensagem: <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1c0c3b; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+  <div style="text-align: center; margin-bottom: 20px;">
+    <img src="https://raw.githubusercontent.com/miguelsmuller/dev-berserkfit/main/assets/logotipo1.png" alt="BerserkFit Logo" style="max-height: 60px;">
+  </div>
+  
+  <p style="font-size: 16px; font-weight: bold; margin-bottom: 15px;">Olá [NOME],</p>
+  
+  <p style="font-size: 15px; margin-bottom: 20px;">Esperamos que esteja a ter uma semana incrível de treinos e superação! Na BerserkFit, estamos sempre focados em evoluir e trazer as melhores ferramentas inteligentes de treino para si.</p>
+  
+  <p style="font-size: 15px; margin-bottom: 20px;">A sua opinião como membro ativo da nossa legião é de extrema importância. Gostaríamos de contar com a sua breve avaliação sobre a nossa plataforma, treinos gerados por IA e checklists diárias. Leva menos de 1 minuto!</p>
+  
+  <!-- Botão de Opinião -->
+  <div style="text-align: center; margin: 30px 0;">
+    <a href="[[URL_TESTEMUNHO]]" style="display: inline-block; background-color: #1c0c3b; color: #ffd700; font-weight: bold; text-decoration: none; padding: 14px 30px; border-radius: 8px; font-size: 15px; box-shadow: 0 4px 6px rgba(28,12,59,0.15);">
+      Deixar o meu Testemunho ⭐⭐⭐⭐⭐
+    </a>
+  </div>
+  
+  <p style="font-size: 15px; margin-bottom: 30px;">Desejamos-lhe bons treinos e evolução implacável!</p>
+  
+  <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 25px 0;">
+  
+  <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+    <tr>
+      <td style="padding-bottom: 15px;">
+        <span style="font-size: 16px; font-weight: bold; color: #ef4444; display: block;">Victor Santos</span>
+        <span style="font-weight: bold; color: #1c0c3b; display: block; margin-top: 2px;">CEO</span>
+        <a href="mailto:victor@berserkfit.pt" style="color: #6d28d9; text-decoration: none; display: block; margin-top: 2px;">victor@berserkfit.pt</a>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-bottom: 15px;">
+        <span style="font-weight: bold; color: #1c0c3b; display: block;">BerserkFit AI Gym &amp; Solutions</span>
+        <span style="color: #64748b; display: block; margin-top: 2px;">Av. Central, n.º 123</span>
+        <span style="color: #64748b; display: block; margin-top: 2px;">4700-300 Braga, Portugal</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding-bottom: 15px;">
+        <span style="display: block;"><a href="https://www.berserkfit.pt" style="color: #6d28d9; text-decoration: none; font-weight: bold;">www.berserkfit.pt</a></span>
+        <span style="display: block; margin-top: 2px;"><a href="mailto:suporte@berserkfit.pt" style="color: #6d28d9; text-decoration: none;">suporte@berserkfit.pt</a></span>
+        <span style="color: #64748b; display: block; margin-top: 4px;">(+351) 912 345 678 * (Chamada para rede móvel nacional)</span>
+        <span style="color: #64748b; display: block; margin-top: 2px;">(+351) 253 123 456 ** (Chamada para rede fixa nacional)</span>
+      </td>
+    </tr>
+  </table>
+  
+  <div style="font-size: 10px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 15px; margin-top: 15px; text-align: justify; line-height: 1.4;">
+    <p style="margin: 0 0 8px 0;"><strong>Proteção de dados:</strong> A BerserkFit é responsável pelo tratamento dos seus dados pessoais ao abrigo dos regulamentos em vigor (RGPD), apenas com a finalidade profissional de gestão de utilizadores e subscrições. Os seus dados serão conservados pelo tempo necessário à manutenção da finalidade do tratamento e durante o prazo legalmente estabelecido. Pode exercer os seus direitos de acesso, retificação, eliminação ou oposição enviando o seu pedido para o encarregado de proteção de dados: <a href="mailto:rgpd@berserkfit.pt" style="color: #64748b; text-decoration: underline;">rgpd@berserkfit.pt</a>.</p>
+    <p style="margin: 0;"><strong>Aviso legal:</strong> Esta mensagem e os seus anexos são endereçados exclusivamente ao destinatário, podendo conter informações confidenciais sujeitas a sigilo profissional. A sua reprodução ou distribuição não é permitida sem a nossa autorização expressa. Se não for o destinatário final, agradecemos que o elimine e nos informe do ocorrido.</p>
+  </div>
+</div>
+-----------------------------------------
+✅ Enviado com PHPMailer para: Saude em sintonia (contato.saudeemsintonia@gmail.com)
+✅ Enviado com PHPMailer para: discord gg (discordggts8@gmail.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+✅ Enviado com PHPMailer para: G (vitoriaribesantos@gmail.com)
+✅ Enviado com PHPMailer para: tsiuki sokosks (tsukisteam2609@gmail.com)
+✅ Enviado com PHPMailer para: Victor Santos (victorhugoribeiro992609@gmail.com)
+✅ Enviado com PHPMailer para: victor12 (victor123@gmail.com)
+✅ Enviado com PHPMailer para: Pap Victor (papvictorsantos@gmail.com)
+✅ Enviado com PHPMailer para: VICTOR SANTOSPAP (PAP123@GMAIL.COM)
+✅ Enviado com PHPMailer para: Victor Santos (victor123pap1@gmail.com)
+✅ Enviado com PHPMailer para: Papintermedia (papintermedia@gmail.com)
+✅ Enviado com PHPMailer para: Berserk Fit (contato.berserkfit@gmail.com)
+=== Lançamento de Broadcast em 2026-06-12 14:45:25 ===
+Filtro: custom (Dias: 7)
+Assunto: Queremos saber a sua opinião sobre o BerserkFit! ⭐
+Mensagem: OLÁAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+-----------------------------------------
+✅ Enviado com PHPMailer para: Guerreiro (luanagoncalves26@icloud.com)
+=== Lançamento de Broadcast em 2026-06-12 14:45:47 ===
+Filtro: custom (Dias: 7)
+Assunto: Queremos saber a sua opinião sobre o BerserkFit! ⭐
+Mensagem: FUNCIONOU???????????????????
+-----------------------------------------
+✅ Enviado com PHPMailer para: Guerreiro (luanagoncalves26@icloud.com)
+=== Lançamento de Broadcast em 2026-06-12 14:46:12 ===
+Filtro: custom (Dias: 7)
+Assunto: Queremos saber a sua opinião sobre o BerserkFit! ⭐
+Mensagem: RESPONDEEEEEEEEEEEEEE MEEEEEEEEEEEEEEEEEEEEEEEEEEE
+-----------------------------------------
+✅ Enviado com PHPMailer para: Guerreiro (luanagoncalves26@icloud.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+=== Lançamento de Broadcast em 2026-06-16 14:24:58 ===
+Filtro: custom (Dias: 7)
+Assunto: Queremos saber a sua opinião sobre o BerserkFit! ⭐
+Mensagem: [[URL_TESTEMUNHO]]
+-----------------------------------------
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+=== Lançamento de Broadcast em 2026-07-06 16:35:18 ===
+Filtro: custom (Dias: 7)
+Assunto: victorhugoribeiro2609@gmail.com
+Mensagem: olá teste
+-----------------------------------------
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+=== Lançamento de Broadcast em 2026-07-06 16:36:28 ===
+Filtro: todos (Dias: 7)
+Assunto: Queremos saber a sua opinião sobre o BerserkFit! ⭐
+Mensagem: [url]
+-----------------------------------------
+✅ Enviado com PHPMailer para: Saude em sintonia (contato.saudeemsintonia@gmail.com)
+✅ Enviado com PHPMailer para: discord gg (discordggts8@gmail.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+✅ Enviado com PHPMailer para: G (vitoriaribesantos@gmail.com)
+✅ Enviado com PHPMailer para: tsiuki sokosks (tsukisteam2609@gmail.com)
+✅ Enviado com PHPMailer para: Victor Santos (victorhugoribeiro992609@gmail.com)
+✅ Enviado com PHPMailer para: victor12 (victor123@gmail.com)
+✅ Enviado com PHPMailer para: Pap Victor (papvictorsantos@gmail.com)
+✅ Enviado com PHPMailer para: VICTOR SANTOSPAP (PAP123@GMAIL.COM)
+✅ Enviado com PHPMailer para: Victor Santos (victor123pap1@gmail.com)
+✅ Enviado com PHPMailer para: Papintermedia (papintermedia@gmail.com)
+✅ Enviado com PHPMailer para: Berserk Fit (contato.berserkfit@gmail.com)
+✅ Enviado com PHPMailer para: Victor Santosteste1 (victorsantosteste1@gmail.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro1112609@gmail.com)
+✅ Enviado com PHPMailer para: victor santospap1 (victorsantospap1@gmail.com)
+=== Lançamento de Broadcast em 2026-07-06 16:37:02 ===
+Filtro: todos (Dias: 7)
+Assunto: Queremos saber a sua opinião sobre o BerserkFit! ⭐
+Mensagem: [[URL_TESTEMUNHO]]
+-----------------------------------------
+✅ Enviado com PHPMailer para: Saude em sintonia (contato.saudeemsintonia@gmail.com)
+✅ Enviado com PHPMailer para: discord gg (discordggts8@gmail.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro2609@gmail.com)
+✅ Enviado com PHPMailer para: G (vitoriaribesantos@gmail.com)
+✅ Enviado com PHPMailer para: tsiuki sokosks (tsukisteam2609@gmail.com)
+✅ Enviado com PHPMailer para: Victor Santos (victorhugoribeiro992609@gmail.com)
+✅ Enviado com PHPMailer para: victor12 (victor123@gmail.com)
+✅ Enviado com PHPMailer para: Pap Victor (papvictorsantos@gmail.com)
+✅ Enviado com PHPMailer para: VICTOR SANTOSPAP (PAP123@GMAIL.COM)
+✅ Enviado com PHPMailer para: Victor Santos (victor123pap1@gmail.com)
+✅ Enviado com PHPMailer para: Papintermedia (papintermedia@gmail.com)
+✅ Enviado com PHPMailer para: Berserk Fit (contato.berserkfit@gmail.com)
+✅ Enviado com PHPMailer para: Victor Santosteste1 (victorsantosteste1@gmail.com)
+✅ Enviado com PHPMailer para: Victor Hugo (victorhugoribeiro1112609@gmail.com)
+✅ Enviado com PHPMailer para: victor santospap1 (victorsantospap1@gmail.com)

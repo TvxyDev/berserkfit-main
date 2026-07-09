@@ -82,111 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Perfil - BerserkFit</title>
+    <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/perfil.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <style>
-        .edit-container {
-            max-width: 600px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--cor-texto);
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-family: inherit;
-        }
-
-        .header-edit {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header-edit img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            border: 3px solid var(--cor-destaque);
-            cursor: pointer;
-        }
-
-        .btn-upload {
-            background: var(--cor-secundaria);
-            color: var(--cor-texto);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: inline-block;
-            margin: 5px;
-            border: 1px solid #ccc;
-            transition: all 0.2s;
-        }
-
-        .btn-upload:hover {
-            background: #e5e7eb;
-        }
-
-        .btn-remove {
-            background: #ffe4e6;
-            color: #991b1b;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: inline-block;
-            margin: 5px;
-            border: 1px solid #fecaca;
-            transition: all 0.2s;
-        }
-
-        .btn-remove:hover {
-            background: #fecaca;
-        }
-
-        .btn-save {
-            width: 100%;
-            padding: 12px;
-            background: var(--cor-destaque);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-save:hover {
-            background: var(--cor-destaque-escuro);
-        }
-
-        .back-link {
-            display: block;
-            margin-bottom: 20px;
-            color: var(--cor-destaque);
-            text-decoration: none;
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" href="css/editar_perfil.css">
 </head>
 
 <body>
@@ -283,9 +185,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function removerFoto() {
             document.getElementById('remover_foto').value = '1';
             document.querySelector('.header-edit img').src = 'assets/fotos/default-user.png';
-            alert('Foto removida visualmente. Clique em "Guardar Alterações" para confirmar.');
+            showCustomAlert('Alterar Foto', 'Foto removida visualmente. Clique em "Guardar Alterações" para confirmar.');
         }
     </script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>

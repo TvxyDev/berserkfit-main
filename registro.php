@@ -2,6 +2,9 @@
 session_start();
 
 $mensagem = "";
+if (isset($_SESSION['redirect_checkout_plano'])) {
+    $mensagem = "ℹ️ Registe-se para prosseguir com a subscrição do seu plano.";
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Conexão
@@ -18,9 +21,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $data_nascimento = $_POST['data_nascimento'];
     $genero = $_POST['genero'];
 
-    // Valida se as senhas são iguais
+    // Valida se as senhas são iguais e a data
     if ($senha !== $confirmar_senha) {
         $mensagem = "❌ As palavras-passe não coincidem!";
+    } elseif ($data_nascimento > date('Y-m-d')) {
+        $mensagem = "❌ A data de nascimento não pode ser no futuro!";
     } else {
         // Gera hash da senha
         $password_hash = password_hash($senha, PASSWORD_DEFAULT);
@@ -60,9 +65,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registo - BerserkFit</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/estilo.css">
-    <link rel="stylesheet" href="css/login.css">
-    <link rel="stylesheet" href="css/registro.css">
+    <link rel="stylesheet" href="css/estilo.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/login.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/registro.css?v=<?= time() ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Inter:wght@400;700&display=swap"
@@ -108,7 +113,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="logotipo">
                 <img src="assets/logotipo1.png" alt="Logótipo BerserkFit">
             </div>
-            <ul>
+            <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="menu-overlay" id="menuOverlay"></div>
+            <ul class="nav-menu" id="navMenu">
                 <li><a href="index.php#inicio">Início</a></li>
                 <li><a href="index.php#funcionalidades">Funcionalidades</a></li>
                 <li><a href="index.php#planos">Planos</a></li>
@@ -134,7 +143,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php if ($mensagem != ""): ?>
                     <p class="mensagem"
                         style="text-align: center; margin-bottom: 15px; color: <?php echo strpos($mensagem, '✅') !== false ? 'green' : 'red'; ?>;">
-                        <?php echo $mensagem; ?></p>
+                        <?php echo $mensagem; ?>
+                    </p>
                 <?php endif; ?>
                 <form method="POST" action="registro.php">
                     <div class="input-group">
@@ -172,7 +182,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     <div class="input-group">
                         <label for="data_nascimento">Data de Nascimento</label>
-                        <input type="date" id="data_nascimento" name="data_nascimento" required>
+                        <input type="date" id="data_nascimento" name="data_nascimento"
+                            max="<?php echo date('Y-m-d'); ?>" required>
                     </div>
                     <div class="input-group">
                         <label for="genero">Género</label>
@@ -190,6 +201,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
     </main>
+    <script src="js/main.js"></script>
 </body>
 
 </html>

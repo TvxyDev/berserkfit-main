@@ -1,3 +1,5 @@
+@import url('responsive.css');
+
 body.login-page {
     background-image: none;
     overflow: auto;
@@ -32,13 +34,18 @@ body {
     max-width: 450px;
     position: relative;
     z-index: 2; /* Ensure login form is above icons */
+    backdrop-filter: blur(168px);
+    border-radius: 25px 25px 25px 25px;
 }
 
 .login-box {
-    background-color: var(--cor-fundo-login);
     padding: 0;
     text-align: left;
     color: var(--cor-texto-login);
+    padding-left: 10px;
+    padding-right: 10px;
+    backdrop-filter: blur(168px);
+    border-radius: 25px 25px 25px 25px;
 }
 
 .login-box h1 {

@@ -1,3 +1,4 @@
+@import url('responsive.css');
 :root {
   --cor-fundo: #f8f7ff;
   --cor-primaria: #ffffff;
@@ -12,16 +13,28 @@
   --fonte-titulo: "Poppins", sans-serif;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
 body {
   background-color: var(--cor-fundo);
   color: var(--cor-texto);
   font-family: var(--fonte-texto);
-  margin: 0;
   background-image: linear-gradient(
       rgba(255, 255, 255, 0.5),
       rgba(255, 255, 255, 0.5)
     ),
     url("assets/noise.png");
+}
+
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 a {
@@ -167,6 +180,8 @@ nav ul li {
   background-color: var(--cor-primaria);
   color: var(--cor-texto);
   padding-bottom: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .heroi-container {
@@ -176,7 +191,8 @@ nav ul li {
   gap: 30px;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px 0;
+  padding: 0 20px;
+  min-height: 600px; /* Garante altura mínima para desktop */
 }
 
 .heroi-texto h1 {
@@ -185,6 +201,7 @@ nav ul li {
   margin-bottom: 20px;
   color: var(--cor-destaque);
   text-align: left;
+  line-height: 1.1;
 }
 
 .subtitulo-heroi {
@@ -234,10 +251,137 @@ nav ul li {
   box-shadow: 0 15px 25px rgba(14, 6, 28, 0.3);
 }
 
+.botoes-heroi {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.botao-apple {
+  background-color: #000;
+  color: #fff !important;
+  font-family: var(--fonte-titulo);
+  font-size: 1rem;
+  padding: 18px 30px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.botao-apple:hover {
+  background-color: #333;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.botao-apple i {
+  font-size: 1.5rem;
+}
+
+.botao-apple span {
+  font-weight: 700;
+}
+
+/* Modal PWA */
+.modal-pwa {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-pwa-content {
+  background-color: var(--cor-primaria);
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s ease-out;
+  box-sizing: border-box;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.close-pwa {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.close-pwa:hover {
+  color: var(--cor-destaque);
+}
+
+.pwa-steps {
+  text-align: left;
+  margin: 25px 0;
+  padding-left: 20px;
+}
+
+.pwa-steps li {
+  margin-bottom: 15px;
+  line-height: 1.5;
+  color: var(--cor-texto);
+}
+
+.pwa-steps i {
+  color: var(--cor-destaque);
+  margin: 0 5px;
+}
+
+.btn-pwa-entendi {
+  background-color: var(--cor-destaque);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-pwa-entendi:hover {
+  background-color: var(--cor-destaque-escuro);
+}
+
+.heroi-imagem {
+  align-self: end;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  height: 100%;
+}
+
 .heroi-imagem img {
-  max-width: 75%;
-  border-radius: 15px;
+  max-width: 100%; /* Aumentado para preencher melhor */
+  height: auto;
   display: block;
+  margin-top: auto; /* Garante que fica na base */
+  border-radius: 0; /* Removido para colar melhor na borda */
 }
 
 section {
@@ -246,7 +390,7 @@ section {
 }
 
 .hero-section1 {
-  padding: 1px 20px !important;
+  padding: 60px 20px 0 !important; /* Removido padding bottom para colar imagem */
 }
 
 section:nth-of-type(even) {
@@ -296,7 +440,7 @@ section:nth-of-type(even) .subtitulo {
 
 .grade-funcionalidades {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 40px;
   max-width: 1200px;
   margin: 0 auto;
@@ -351,11 +495,12 @@ section:nth-of-type(even) .cartao p {
 
 .grade-precos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 50px; /* Aumentado para evitar overlap com scale */
   max-width: 1200px;
   margin: 0 auto;
   align-items: center;
+  justify-items: center;
 }
 
 .cartao-preco {
@@ -370,8 +515,12 @@ section:nth-of-type(even) .cartao p {
 
 .cartao-preco.destacado {
   border-color: var(--cor-destaque);
-  transform: scale(1.05);
   box-shadow: 0 0 30px rgba(28, 12, 59, 0.2);
+  z-index: 10;
+}
+
+.cartao-preco.destacado:hover {
+  transform: scale(1.05);
 }
 
 .cartao-preco h3 {
@@ -517,10 +666,128 @@ section:nth-of-type(even) .cartao p {
 
 .grade-depoimentos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 40px;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+/* CAROUSEL/SLIDER OVERRIDES */
+.depoimentos-carousel-wrapper {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 50px;
+  box-sizing: border-box;
+}
+
+.depoimentos-carousel-track-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.grade-depoimentos.carousel-track {
+  display: flex;
+  grid-template-columns: none;
+  gap: 30px;
+  margin: 0;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: grab;
+  user-select: none;
+}
+
+.grade-depoimentos.carousel-track.dragging {
+  cursor: grabbing;
+  transition: none;
+}
+
+.grade-depoimentos.carousel-track .cartao-depoimento {
+  flex: 0 0 calc((100% - 60px) / 3);
+  box-sizing: border-box;
+}
+
+@media (max-width: 992px) {
+  .grade-depoimentos.carousel-track .cartao-depoimento {
+    flex: 0 0 calc((100% - 30px) / 2);
+  }
+  .depoimentos-carousel-wrapper {
+    padding: 0 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .grade-depoimentos.carousel-track .cartao-depoimento {
+    flex: 0 0 100%;
+  }
+  .depoimentos-carousel-wrapper {
+    padding: 0 10px;
+  }
+  .carousel-btn {
+    display: none !important;
+  }
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(28, 12, 59, 0.6);
+  border: 1px solid rgba(196, 181, 253, 0.2);
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.carousel-btn:hover {
+  background: var(--cor-primaria);
+  border-color: var(--cor-intermedia);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-btn.prev-btn {
+  left: 0;
+}
+
+.carousel-btn.next-btn {
+  right: 0;
+}
+
+.carousel-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.carousel-dot.active {
+  background: var(--cor-primaria);
+  transform: scale(1.2);
+  width: 20px;
+  border-radius: 5px;
 }
 
 .cartao-depoimento {
@@ -725,6 +992,20 @@ section:nth-of-type(even) .cartao p {
   .heroi-imagem {
     order: -1;
   }
+
+  /* Planos - Tablet & Mobile */
+  .grade-precos {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+    max-width: 500px !important;
+    margin: 0 auto;
+    padding: 20px !important;
+  }
+
+  .cartao-preco.destacado {
+    transform: scale(1) !important;
+    order: -1 !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -738,18 +1019,17 @@ section:nth-of-type(even) .cartao p {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 70%;
+    width: 80%;
     max-width: 300px;
     height: 100vh;
     background-color: var(--cor-primaria);
     flex-direction: column;
     align-items: flex-start;
-    padding: 80px 20px 20px;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    padding: 100px 30px 40px;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
     transition: right 0.3s ease;
     z-index: 1000;
     overflow-y: auto;
-    margin: 0;
   }
 
   .nav-menu.active {
@@ -804,30 +1084,56 @@ section:nth-of-type(even) .cartao p {
     font-size: 2.2rem;
   }
 
-  /* Hero Section */
-  .heroi-container {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 20px;
+  .heroi-imagem {
+    display: none;
+  }
+
+  .hero-section1 {
+    background-color: var(--cor-primaria) !important;
+    background-image: none !important;
+    color: var(--cor-texto) !important;
+    padding: 60px 20px !important;
+    min-height: auto;
+    display: block;
   }
 
   .heroi-texto h1 {
     font-size: 2.5rem;
     text-align: center;
+    color: var(--cor-destaque) !important;
   }
 
   .subtitulo-heroi {
     font-size: 1rem;
     text-align: center;
     max-width: 100%;
+    color: #6b7280 !important;
+  }
+
+  .heroi-texto {
+    text-align: center !important;
   }
 
   .heroi-lista {
-    margin-bottom: 30px;
+    display: inline-block !important; /* Faz o bloco de checks ter apenas o essencial */
+    text-align: left !important; /* Mantém ícone e texto alinhados internamente */
+    width: fit-content !important;
+    max-width: 100% !important;
+    margin: 0 auto 30px !important; /* Centra o bloco todo no ecrã */
+    padding: 0 !important;
   }
 
-  .heroi-imagem {
-    text-align: center;
+  .heroi-lista li {
+    color: #6b7280 !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    align-items: center !important;
+    margin-bottom: 12px !important;
+  }
+
+  .heroi-lista img {
+    filter: none;
+    opacity: 1;
   }
 
   /* Funcionalidades */
@@ -864,7 +1170,9 @@ section:nth-of-type(even) .cartao p {
   /* Depoimentos */
   .grade-depoimentos {
     grid-template-columns: 1fr;
-    padding: 20px;
+    padding: 20px 40px;
+    max-width: 500px;
+    margin: 0 auto;
   }
 
   /* Contato */
@@ -880,12 +1188,32 @@ section:nth-of-type(even) .cartao p {
 
   /* Planos - Grade de Preços */
   .grade-precos {
-    grid-template-columns: 1fr;
-    padding: 20px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 30px !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .cartao-preco {
+    width: calc(100% - 20px) !important; /* Espaço para não tocar nas bordas */
+    max-width: 350px !important;
+    margin: 0 auto 20px !important;
+    padding: 25px !important; /* Reduzido padding interno para caber melhor */
+    height: auto !important;
+    box-sizing: border-box !important;
   }
 
   .cartao-preco.destacado {
-    transform: scale(1);
+    transform: scale(1) !important;
+    order: -1 !important;
+  }
+
+  section {
+    padding: 60px 10px !important; /* Menos padding lateral para não apertar os planos */
+    overflow-x: hidden !important;
   }
 
   /* Sobre - Legião */
@@ -926,9 +1254,47 @@ section:nth-of-type(even) .cartao p {
     font-size: 2rem;
   }
 
+  .botoes-heroi {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 30px auto 0 !important;
+    gap: 15px !important;
+    box-sizing: border-box !important;
+  }
+
   .botao-heroi {
-    font-size: 1rem;
-    padding: 12px 24px;
+    width: calc(100% - 40px) !important; /* Espaço para as bordas do ecrã */
+    max-width: 300px !important;
+    font-size: 1.1rem !important;
+    padding: 16px 20px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .botao-apple {
+    width: calc(100% - 40px) !important;
+    max-width: 300px !important;
+    font-size: 1.1rem !important;
+    padding: 16px 20px !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    background-color: transparent !important;
+    color: var(--cor-destaque) !important;
+    border: 1px solid var(--cor-destaque) !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+  }
+
+  .botao-apple i {
+    font-size: 1.1rem;
   }
 
   header {

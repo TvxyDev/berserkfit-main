@@ -1,24 +1,31 @@
 <?php
+session_start();
 require "ligacao.php";
 require_once __DIR__ . '/functions_2fa.php';
 
-session_start();
+// Redireciona se o utilizador já estiver logado (vai para dashboard)
+if (isset($_SESSION['user_id'])) {
+    header('Location: dashboard.php');
+    exit;
+}
 
-// Redireciona se o utilizador já estiver logado ou se não houver um ID temporário para 2FA
-if (isset($_SESSION['user_id']) || !isset($_SESSION['tfa_user_id'])) {
-    header('Location: index.php');
+// Redireciona se não houver um ID temporário para 2FA (vai para login)
+if (!isset($_SESSION['tfa_user_id'])) {
+    header('Location: login.php');
     exit;
 }
 
 $user_id = $_SESSION['tfa_user_id'];
 $error = '';
 
-// 1. Obter o segredo 2FA do utilizador
-$stmt = $conn->prepare("SELECT tfa_secret, username FROM user WHERE id_user = ?");
+// Obter todos os dados do utilizador necessários para a sessão
+$stmt = $conn->prepare("SELECT tfa_secret, username, nome, email, COALESCE(tipo_usuario, 'Usuario') as tipo_usuario FROM user WHERE id_user = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
+$stmt->close();
+
 $secret = $user['tfa_secret'] ?? null;
 $username = $user['username'] ?? 'Utilizador';
 
@@ -35,23 +42,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if (function_exists('verify_tfa_code') && verify_tfa_code($secret, $code)) {
-            // Código 2FA Válido!
-
-            // Finaliza o login
-            $_SESSION['user_id'] = $user_id;
-            $_SESSION['username'] = $username;
+            // Código 2FA Válido! Finaliza o login com todas as variáveis de sessão
+            $_SESSION['user_id']    = $user_id;
+            $_SESSION['user_nome']  = $user['nome'];
+            $_SESSION['user_email'] = $user['email'];
+            $_SESSION['user_tipo']  = $user['tipo_usuario'];
+            $_SESSION['username']   = $username;
             $_SESSION['last_activity'] = time();
 
-            // Limpa as variáveis temporárias
-            unset($_SESSION['tfa_user_id']);
-            unset($_SESSION['tfa_username']);
+            // Guardar flag de login Google antes de limpar
+            $veio_do_google = !empty($_SESSION['tfa_google_login']);
 
+            // Limpa TODAS as variáveis temporárias de 2FA (incluindo as do Google)
+            unset(
+                $_SESSION['tfa_user_id'],
+                $_SESSION['tfa_username'],
+                $_SESSION['tfa_google_nome'],
+                $_SESSION['tfa_google_email'],
+                $_SESSION['tfa_google_login']
+            );
 
-            header("Location: dashboard.php");
+            // Se veio do Google e não tem username, vai escolher username
+            if ($veio_do_google && empty($username)) {
+                header("Location: escolher_username.php");
+                exit;
+            }
+
+            // Verifica se é o primeiro login (sem hábitos criados)
+            $sql_check = "SELECT COUNT(*) as total FROM habito WHERE id_user = ?";
+            $stmt_check = $conn->prepare($sql_check);
+            $stmt_check->bind_param("i", $user_id);
+            $stmt_check->execute();
+            $result_check = $stmt_check->get_result();
+            $row_check = $result_check->fetch_assoc();
+            $stmt_check->close();
+
+            if ($row_check['total'] == 0) {
+                header("Location: onboarding.php");
+            } else {
+                header("Location: dashboard.php");
+            }
             exit;
         } else {
             $error = "Código incorreto. Tente novamente.";
-
         }
     } catch (Exception $e) {
         $error = "Erro interno. Tente novamente.";
@@ -65,257 +98,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Verificação de Segurança - CyberVault</title>
+    <title>Verificação 2FA - BerserkFit</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        :root {
-            --primary: #06b6d4;
-            --primary-hover: #0891b2;
-            --secondary: #3b82f6;
-            --bg-dark: #020617;
-            --card-bg: rgba(15, 23, 42, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
+    <link rel="stylesheet" href="css/login_2fa.css">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-dark);
-            color: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-
-
-        /* Glass Card */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        }
-
-        @keyframes slideUpFade {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Icon Animation */
-        .icon-container {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(59, 130, 246, 0.1));
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            position: relative;
-        }
-
-        .icon-container svg {
-            width: 40px;
-            height: 40px;
-            color: var(--primary);
-            filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
-            animation: pulseIcon 3s infinite ease-in-out;
-        }
-
-        @keyframes pulseIcon {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
-        }
-
-        /* Input Fields */
-        .otp-container {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            margin: 1.5rem 0;
-        }
-
-        .otp-input {
-            width: 45px;
-            height: 55px;
-            background: rgba(2, 6, 23, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease;
-            caret-color: var(--primary);
-        }
-
-        .otp-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.15);
-            transform: translateY(-2px);
-            background: rgba(2, 6, 23, 0.8);
-        }
-
-        .otp-input:not(:placeholder-shown) {
-            border-color: rgba(6, 182, 212, 0.5);
-            background: rgba(6, 182, 212, 0.05);
-        }
-
-        /* Button */
-        .btn-verify {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 0.5px;
-            box-shadow: 0 10px 20px -5px rgba(6, 182, 212, 0.4);
-        }
-
-        .btn-verify:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px -5px rgba(6, 182, 212, 0.5);
-        }
-
-        .btn-verify:active {
-            transform: translateY(0);
-        }
-
-        .btn-verify::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(255, 255, 255, 0.2), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .btn-verify:hover::after {
-            opacity: 1;
-        }
-
-        /* Error Message */
-        .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-            padding: 0.75rem;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
-        }
-
-        @keyframes shake {
-
-            10%,
-            90% {
-                transform: translate3d(-1px, 0, 0);
-            }
-
-            20%,
-            80% {
-                transform: translate3d(2px, 0, 0);
-            }
-
-            30%,
-            50%,
-            70% {
-                transform: translate3d(-4px, 0, 0);
-            }
-
-            40%,
-            60% {
-                transform: translate3d(4px, 0, 0);
-            }
-        }
-
-        /* Footer */
-        .footer-link {
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 0.875rem;
-            transition: color 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .footer-link:hover {
-            color: var(--primary);
-        }
-
-        .footer-link svg {
-            width: 16px;
-            height: 16px;
-        }
-    </style>
 </head>
 
 <body>
-    <?php include __DIR__ . '/../includes/particle_background.php'; ?>
+    <!-- bg-particles mantido para não quebrar o JS existente mas está oculto via CSS -->
+    <div class="bg-particles" id="bgParticles"></div>
 
     <div class="glass-card">
+
+        <div class="brand-label">🔒 BerserkFit</div>
+
         <div class="text-center">
             <div class="icon-container">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -325,15 +122,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </svg>
             </div>
 
-            <h1 class="text-2xl font-bold text-white mb-2">Verificação em Duas Etapas</h1>
-            <p class="text-slate-400 text-sm mb-6">
-                Digite o código de 6 dígitos gerado pelo seu aplicativo autenticador.
+            <h1 class="card-title">Verificação em Duas Etapas</h1>
+            <p class="card-subtitle">
+                Introduz o código de 6 dígitos gerado<br>pelo teu aplicativo autenticador.
             </p>
         </div>
 
         <?php if (!empty($error)): ?>
             <div class="error-msg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20"
+                <svg xmlns="http://www.w3.org/2000/svg" class="error-icon" viewBox="0 0 20 20"
                     fill="currentColor">
                     <path fill-rule="evenodd"
                         d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -356,12 +153,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" class="otp-input" maxlength="1" pattern="\d" inputmode="numeric" required>
             </div>
 
-            <button type="submit" class="btn-verify mt-6">
+            <button type="submit" class="btn-verify">
                 Verificar Identidade
             </button>
+            <div style="text-align: center; margin-top: 15px;">
+                <a href="recovery_2fa.php" style="color: #64748b; font-size: 0.85rem; text-decoration: none;">Perdi o acesso? Usar código de recuperação</a>
+            </div>
         </form>
 
-        <div class="mt-8 text-center border-t border-slate-700/50 pt-6">
+        <hr class="divider">
+
+        <div class="text-center">
             <a href="logout.php" class="footer-link">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                     stroke-width="2">
@@ -465,6 +267,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             });
         });
+    </script>
+
+    <script>
+        // Gera partículas animadas no fundo
+        (function() {
+            const container = document.getElementById('bgParticles');
+            if (!container) return;
+            const colors = ['rgba(139,92,246,0.5)', 'rgba(196,181,253,0.4)', 'rgba(109,40,217,0.4)', 'rgba(167,139,250,0.3)'];
+            for (let i = 0; i < 25; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = Math.random() * 8 + 3;
+                p.style.cssText = `
+                    width:${size}px; height:${size}px;
+                    left:${Math.random()*100}%;
+                    bottom:-${size}px;
+                    background:${colors[Math.floor(Math.random()*colors.length)]};
+                    animation-duration:${Math.random()*15+8}s;
+                    animation-delay:${Math.random()*10}s;
+                `;
+                container.appendChild(p);
+            }
+        })();
     </script>
 </body>
 

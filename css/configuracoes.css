@@ -1,0 +1,187 @@
+.settings-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.settings-header {
+    margin-bottom: 30px;
+}
+
+.settings-header h1 {
+    font-size: 2rem;
+    color: var(--cor-texto);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings-header h1 i {
+    color: var(--cor-destaque);
+}
+
+.settings-header p {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+/* ── Sections ── */
+.settings-section {
+    background: var(--cor-primaria);
+    border: 1px solid var(--cor-secundaria);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.settings-section:hover {
+    border-color: var(--cor-destaque);
+    box-shadow: 0 4px 16px rgba(28, 12, 59, 0.08);
+}
+
+.settings-section h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--cor-destaque);
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-section h2 i {
+    color: var(--cor-destaque);
+    font-size: 1rem;
+}
+
+.settings-section > p {
+    color: #6b7280;
+    font-size: 0.93rem;
+    margin: 0 0 20px;
+    line-height: 1.6;
+}
+
+/* ── Action rows ── */
+.settings-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 18px;
+    background: var(--cor-fundo);
+    border: 1px solid var(--cor-secundaria);
+    border-radius: 10px;
+    margin-top: 14px;
+    transition: border-color 0.2s;
+}
+
+.settings-action:hover {
+    border-color: var(--cor-intermedia);
+}
+
+.settings-action-info {
+    flex: 1;
+}
+
+.settings-action-info h3 {
+    margin: 0 0 4px;
+    color: var(--cor-texto);
+    font-size: 0.97rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.settings-action-info p {
+    margin: 0;
+    font-size: 0.84rem;
+    color: #888;
+    line-height: 1.5;
+}
+
+/* ── Badges ── */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+}
+
+/* ── Primary Button (site palette) ── */
+.btn-primary {
+    flex-shrink: 0;
+    padding: 10px 22px;
+    background: var(--cor-destaque);
+    color: var(--cor-primaria);
+    border: none;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.2s, box-shadow 0.25s;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.btn-primary:hover {
+    background: var(--cor-destaque-escuro, #13082b);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(28, 12, 59, 0.25);
+}
+
+/* ── Secondary Button ── */
+.btn-secondary {
+    flex-shrink: 0;
+    padding: 10px 22px;
+    background: transparent;
+    color: var(--cor-destaque);
+    border: 1.5px solid var(--cor-intermedia);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.btn-secondary:hover {
+    background: var(--cor-secundaria);
+    border-color: var(--cor-destaque);
+    transform: translateY(-2px);
+}
+
+/* ── Back link ── */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cor-destaque);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    transition: gap 0.2s;
+}
+
+.back-link:hover {
+    gap: 12px;
+}

@@ -1,15 +1,22 @@
 <?php
 session_start();
+date_default_timezone_set('Europe/Lisbon');
 
-// Verifica se o utilizador está logado
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
+// Redireciona para o checkout se houver plano pendente no login
+if (isset($_SESSION['redirect_checkout_plano'])) {
+    $plano_pendente = $_SESSION['redirect_checkout_plano'];
+    unset($_SESSION['redirect_checkout_plano']);
+    header("Location: checkout.php?plano=" . urlencode($plano_pendente));
+    exit;
+}
+
 require 'ligacao.php';
 
-// Verifica se já completou onboarding (já tem hábitos criados)
 $user_id = $_SESSION['user_id'];
 $sql_check = "SELECT COUNT(*) as total FROM habito WHERE id_user = ?";
 $stmt = $conn->prepare($sql_check);
@@ -19,15 +26,29 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $stmt->close();
 
-// Se não tem hábitos, redireciona para onboarding
 if ($row['total'] == 0) {
     header("Location: onboarding.php");
     exit;
 }
 
-// Buscar dados de água de hoje
 $agua_hoje = 0;
-$agua_meta = 3.0; // Meta padrão de 3L
+$agua_meta = 3.0;
+
+try {
+    $sql_meta_agua = "SELECT valor FROM meta_usuario WHERE id_user = ? AND tipo = 'agua'";
+    $stmt_meta = $conn->prepare($sql_meta_agua);
+    if ($stmt_meta) {
+        $stmt_meta->bind_param("i", $user_id);
+        $stmt_meta->execute();
+        $result_meta = $stmt_meta->get_result();
+        if ($row_meta = $result_meta->fetch_assoc()) {
+            $agua_meta = floatval($row_meta['valor']);
+        }
+        $stmt_meta->close();
+    }
+} catch (Exception $e) {
+}
+
 $sql_agua = "SELECT COALESCE(SUM(quantidade), 0) as total FROM agua WHERE id_user = ? AND data = CURDATE()";
 $stmt = $conn->prepare($sql_agua);
 $stmt->bind_param("i", $user_id);
@@ -38,7 +59,6 @@ if ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Buscar peso mais recente
 $peso_atual = null;
 $data_peso = null;
 $sql_peso = "SELECT peso, data FROM peso WHERE id_user = ? ORDER BY data DESC LIMIT 1";
@@ -52,30 +72,51 @@ if ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Buscar calorias queimadas de hoje (assumindo que existe tabela treino ou exercicio)
-$calorias_queimadas = 0;
-$calorias_meta = 800; // Meta padrão
-// Tentar buscar de uma tabela de treinos se existir
+$calorias_ingeridas = 0;
+$calorias_meta = 2000; // Meta padrão de ingestão se não definida
 try {
-    $sql_calorias = "SELECT COALESCE(SUM(calorias_queimadas), 0) as total FROM treino WHERE id_user = ? AND DATE(data_treino) = CURDATE()";
+    // Buscar meta personalizada de calorias
+    $sql_meta_cal = "SELECT valor FROM meta_usuario WHERE id_user = ? AND tipo = 'calorias'";
+    $stmt_meta = $conn->prepare($sql_meta_cal);
+    if ($stmt_meta) {
+        $stmt_meta->bind_param("i", $user_id);
+        $stmt_meta->execute();
+        $res_meta = $stmt_meta->get_result();
+        if ($row_meta = $res_meta->fetch_assoc()) {
+            $calorias_meta = floatval($row_meta['valor']);
+        }
+        $stmt_meta->close();
+    }
+
+    // Buscar ingestão de hoje
+    $proteinas_hoje = 0;
+    $carbs_hoje = 0;
+    $gorduras_hoje = 0;
+    
+    $sql_calorias = "SELECT COALESCE(SUM(calorias), 0) as total, 
+                            COALESCE(SUM(proteinas), 0) as proteinas, 
+                            COALESCE(SUM(carbs), 0) as carbs, 
+                            COALESCE(SUM(gorduras), 0) as gorduras 
+                     FROM alimentacao 
+                     WHERE id_user = ? AND data = CURDATE()";
     $stmt = $conn->prepare($sql_calorias);
     if ($stmt) {
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $result = $stmt->get_result();
         if ($row = $result->fetch_assoc()) {
-            $calorias_queimadas = floatval($row['total']);
+            $calorias_ingeridas = floatval($row['total']);
+            $proteinas_hoje = floatval($row['proteinas']);
+            $carbs_hoje = floatval($row['carbs']);
+            $gorduras_hoje = floatval($row['gorduras']);
         }
         $stmt->close();
     }
 } catch (Exception $e) {
-    // Tabela não existe ou campos diferentes, usar valor padrão
-    $calorias_queimadas = 0;
 }
 
-// Buscar minutos de treino de hoje
 $minutos_treino = 0;
-$minutos_meta = 60; // Meta padrão de 60 minutos
+$minutos_meta = 60;
 try {
     $sql_minutos = "SELECT COALESCE(SUM(duracao_minutos), 0) as total FROM treino WHERE id_user = ? AND DATE(data_treino) = CURDATE()";
     $stmt = $conn->prepare($sql_minutos);
@@ -89,15 +130,12 @@ try {
         $stmt->close();
     }
 } catch (Exception $e) {
-    // Tabela não existe ou campos diferentes, usar valor padrão
-    $minutos_treino = 0;
 }
 
-// Buscar horas de sono (assumindo que existe uma tabela ou campo para isso)
 $horas_sono = 0;
 $minutos_sono = 0;
 $sono_total_minutos = 0;
-$sono_meta_minutos = 450; // 7h30min = 450 minutos
+$sono_meta_minutos = 450;
 try {
     $sql_sono = "SELECT horas, minutos FROM sono WHERE id_user = ? AND data = CURDATE()";
     $stmt = $conn->prepare($sql_sono);
@@ -113,12 +151,27 @@ try {
         $stmt->close();
     }
 } catch (Exception $e) {
-    // Tabela não existe, usar valor padrão
-    $horas_sono = 0;
-    $minutos_sono = 0;
 }
 
-// Verificar se é Admin (antes de fechar a conexão)
+$habitos_user = [];
+try {
+    $sql_habitos = "SELECT h.id_habito, h.descricao, h.meta_diaria, h.tipo, COALESCE(c.concluido, 0) as concluido 
+                    FROM habito h 
+                    LEFT JOIN checklist_diario c ON h.id_habito = c.id_habito AND c.data = CURDATE() 
+                    WHERE h.id_user = ?";
+    $stmt_habitos = $conn->prepare($sql_habitos);
+    if ($stmt_habitos) {
+        $stmt_habitos->bind_param("i", $user_id);
+        $stmt_habitos->execute();
+        $result_habitos = $stmt_habitos->get_result();
+        while ($row_habito = $result_habitos->fetch_assoc()) {
+            $habitos_user[] = $row_habito;
+        }
+        $stmt_habitos->close();
+    }
+} catch (Exception $e) {
+}
+
 $is_admin = false;
 try {
     $sql_admin = "SELECT COALESCE(tipo_usuario, 'Usuario') as tipo_usuario FROM user WHERE id_user = ?";
@@ -127,22 +180,120 @@ try {
     $stmt_admin->execute();
     $result_admin = $stmt_admin->get_result();
     if ($row_admin = $result_admin->fetch_assoc()) {
-        $is_admin = ($row_admin['tipo_usuario'] ?? 'Usuario') === 'Admin';
+        $tipo_usr = $row_admin['tipo_usuario'] ?? 'Usuario';
+        $is_admin = ($tipo_usr === 'Admin' || $tipo_usr === 'SuperAdmin');
     }
     $stmt_admin->close();
 } catch (Exception $e) {
-    // Campo não existe ainda
 }
+// --- Início: Logs para Gráficos ---
+$historico_peso = [];
+$sql_hist_peso = "SELECT data, peso FROM peso WHERE id_user = ? ORDER BY data DESC LIMIT 30";
+$stmt_hp = $conn->prepare($sql_hist_peso);
+$stmt_hp->bind_param("i", $user_id);
+$stmt_hp->execute();
+$res_hp = $stmt_hp->get_result();
+while ($row = $res_hp->fetch_assoc()) {
+    $historico_peso[] = $row;
+}
+$stmt_hp->close();
+
+$datas_peso_js = [];
+$valores_peso_js = [];
+$hist_peso_reverse = array_reverse($historico_peso);
+foreach ($hist_peso_reverse as $hp) {
+    if (isset($hp['data']) && isset($hp['peso'])) {
+        $datas_peso_js[] = date('d/m', strtotime($hp['data']));
+        $valores_peso_js[] = floatval($hp['peso']);
+    }
+}
+
+$exercicios_com_hist = [];
+$sql_ex_hist = "
+    SELECT DISTINCT e.id_exercicio, e.nome_exercicio 
+    FROM exercicio e
+    JOIN treino t ON e.id_treino = t.id_treino
+    WHERE t.id_user = ?
+    UNION
+    SELECT DISTINCT e.id_exercicio, e.nome_exercicio 
+    FROM historico_exercicio_log hel
+    JOIN exercicio e ON hel.id_exercicio = e.id_exercicio
+    JOIN historico_treino_log htl ON hel.id_log = htl.id_log
+    WHERE htl.id_user = ?
+    ORDER BY nome_exercicio ASC
+";
+$stmt_eh = $conn->prepare($sql_ex_hist);
+$stmt_eh->bind_param("ii", $user_id, $user_id);
+$stmt_eh->execute();
+$res_eh = $stmt_eh->get_result();
+while ($row = $res_eh->fetch_assoc()) {
+    $exercicios_com_hist[] = $row;
+}
+$stmt_eh->close();
+
+// Buscando o Volume de Carga (Força Global) Agrupado por Semana
+$historico_forca_global = [];
+$sql_forca_global = "
+    SELECT 
+        YEARWEEK(htl.data_treino, 1) as semana,
+        MIN(DATE(htl.data_treino)) as inicio_semana,
+        SUM(hel.peso_kg * hel.repeticoes) as volume_total
+    FROM historico_treino_log htl
+    JOIN historico_exercicio_log hel ON htl.id_log = hel.id_log
+    WHERE htl.id_user = ? 
+      AND htl.data_treino >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
+    GROUP BY semana
+    ORDER BY semana ASC
+";
+$stmt_fg = $conn->prepare($sql_forca_global);
+if ($stmt_fg) {
+    $stmt_fg->bind_param("i", $user_id);
+    $stmt_fg->execute();
+    $res_fg = $stmt_fg->get_result();
+    while ($row = $res_fg->fetch_assoc()) {
+        $historico_forca_global[] = $row;
+    }
+    $stmt_fg->close();
+}
+
+// Calcular % de aumento (comparando última e penúltima semana disponíveis)
+$aumento_percentual = 0;
+$icone_aumento = "";
+$cor_aumento = "#9ca3af";
+if (count($historico_forca_global) >= 2) {
+    $ultima_semana = end($historico_forca_global);
+    $penultima_semana = prev($historico_forca_global);
+    if ($penultima_semana['volume_total'] > 0) {
+        $aumento_percentual = (($ultima_semana['volume_total'] - $penultima_semana['volume_total']) / $penultima_semana['volume_total']) * 100;
+        if ($aumento_percentual > 0) {
+            $icone_aumento = "<i class='fas fa-arrow-up'></i>";
+            $cor_aumento = "#22c55e"; // verde
+        } elseif ($aumento_percentual < 0) {
+            $icone_aumento = "<i class='fas fa-arrow-down'></i>";
+            $cor_aumento = "#ef4444"; // vermelho
+        }
+    }
+}
+
+// Preparar dados do gráfico Volume Global
+$datas_forca_js = [];
+$valores_forca_js = [];
+foreach ($historico_forca_global as $fg) {
+    $datas_forca_js[] = 'Sem. ' . date('d/m', strtotime($fg['inicio_semana']));
+    $valores_forca_js[] = floatval($fg['volume_total']);
+}
+// --- Fim: Logs para Gráficos ---
 
 $conn->close();
 
-// Calcular percentuais
 $agua_percentual = $agua_meta > 0 ? min(100, ($agua_hoje / $agua_meta) * 100) : 0;
-$calorias_percentual = $calorias_meta > 0 ? min(100, ($calorias_queimadas / $calorias_meta) * 100) : 0;
+$calorias_percentual = $calorias_meta > 0 ? min(100, ($calorias_ingeridas / $calorias_meta) * 100) : 0;
 $minutos_percentual = $minutos_meta > 0 ? min(100, ($minutos_treino / $minutos_meta) * 100) : 0;
 $sono_percentual = $sono_meta_minutos > 0 ? min(100, ($sono_total_minutos / $sono_meta_minutos) * 100) : 0;
-?>
 
+$habitos_total = count($habitos_user);
+$habitos_concluidos = array_sum(array_column($habitos_user, 'concluido'));
+?>
 <!DOCTYPE html>
 <html lang="pt-PT">
 
@@ -150,198 +301,228 @@ $sono_percentual = $sono_meta_minutos > 0 ? min(100, ($sono_total_minutos / $son
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - BerserkFit</title>
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/global.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/dashboard.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@700;800&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
+
+    <!-- ══════════ HEADER ══════════ -->
     <header class="fade-in-element">
         <div class="header-top">
             <h1 class="app-title">BerserkFit AI</h1>
-            <div style="display: flex; gap: 15px; align-items: center;">
+            <div class="header-actions">
                 <?php if ($is_admin): ?>
-                    <a href="admin.php"
-                        style="color: var(--cor-texto-claro); text-decoration: none; font-size: 0.9em; padding: 8px 15px; background: rgba(220, 53, 69, 0.3); border-radius: 20px; transition: background 0.3s;"
-                        onmouseover="this.style.background='rgba(220, 53, 69, 0.5)'"
-                        onmouseout="this.style.background='rgba(220, 53, 69, 0.3)'">
+                    <a href="admin.php" class="btn-admin">
                         <i class="fas fa-shield-alt"></i> Admin
                     </a>
                 <?php endif; ?>
                 <div class="streak-counter">
                     <i class="fa-solid fa-fire"></i>
-                    <span>1</span>
+                    <span><?= $global_streak ?? 0 ?></span>
                 </div>
             </div>
         </div>
+
         <div class="calendar">
             <?php
-            // Calcular os últimos 7 dias
             $dias_semana = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-            $dias_semana_nomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-
-            // Começar 6 dias atrás para mostrar 7 dias (incluindo hoje)
             for ($i = 6; $i >= 0; $i--) {
                 $timestamp = strtotime("-$i days");
-                $dia_semana_num = date('w', $timestamp); // 0 = Domingo, 6 = Sábado
+                $dia_semana_num = date('w', $timestamp);
                 $dia_mes = date('d', $timestamp);
-                $dia_semana_letra = $dias_semana[$dia_semana_num];
                 $is_hoje = date('Y-m-d', $timestamp) === date('Y-m-d');
                 ?>
                 <div class="calendar-day <?php echo $is_hoje ? 'active' : ''; ?>">
-                    <span><?php echo $dia_semana_letra; ?></span>
+                    <span><?php echo $dias_semana[$dia_semana_num]; ?></span>
                     <span><?php echo $dia_mes; ?></span>
                 </div>
             <?php } ?>
         </div>
+
         <div class="header-greeting">
             <h2>Bom dia, <?php echo htmlspecialchars($_SESSION['user_nome']); ?>!</h2>
             <p>Pronto para conquistar o dia?</p>
         </div>
     </header>
 
+    <!-- ══════════ MAIN ══════════ -->
     <main>
-        <section id="resumo-dia" class="fade-in-element">
-            <h2>Resumo do Dia</h2>
+
+        <!-- Resumo do Dia -->
+        <section id="resumo-dia">
+            <h2 class="section-title">Resumo do Dia</h2>
             <div class="grade-resumo">
-                <div class="card-resumo">
-                    <h3>💧 Água ingerida</h3>
-                    <p><?php echo number_format($agua_hoje, 1); ?>L / <?php echo $agua_meta; ?>L</p>
+
+                <!-- Água -->
+                <div class="card-resumo fade-in-element" style="--card-accent: #60a5fa;">
+                    <span class="card-resumo-icon">💧</span>
+                    <h3>Água ingerida</h3>
+                    <div class="valor">
+                        <?php echo number_format($agua_hoje, 1); ?>
+                        <span class="sub">/ <?php echo $agua_meta; ?>L</span>
+                    </div>
                     <div class="progresso-bar">
                         <div class="progresso" style="width: <?php echo $agua_percentual; ?>%;"></div>
                     </div>
+                    <div class="progresso-label"><?php echo round($agua_percentual); ?>%</div>
                 </div>
-                <div class="card-resumo">
-                    <h3>🔥 Calorias queimadas</h3>
-                    <p><?php echo number_format($calorias_queimadas, 0); ?> kcal</p>
+
+                <!-- Calorias -->
+                <div class="card-resumo fade-in-element" style="--card-accent: #fb923c;">
+                    <span class="card-resumo-icon">🥗</span>
+                    <h3>Calorias ingeridas</h3>
+                    <div class="valor">
+                        <?php echo number_format($calorias_ingeridas, 0); ?>
+                        <span class="sub">/ <?php echo $calorias_meta; ?> kcal</span>
+                    </div>
                     <div class="progresso-bar">
                         <div class="progresso" style="width: <?php echo $calorias_percentual; ?>%;"></div>
                     </div>
+                    <div class="progresso-label"><?php echo round($calorias_percentual); ?>%</div>
                 </div>
-                <div class="card-resumo">
-                    <h3>⏱️ Minutos de treino</h3>
-                    <p><?php echo $minutos_treino; ?> min</p>
+
+                <!-- Treino -->
+                <div class="card-resumo fade-in-element" style="--card-accent: #a78bfa;">
+                    <span class="card-resumo-icon">⏱️</span>
+                    <h3>Minutos de treino</h3>
+                    <div class="valor">
+                        <?php echo $minutos_treino; ?>
+                        <span class="sub">min</span>
+                    </div>
                     <div class="progresso-bar">
                         <div class="progresso" style="width: <?php echo $minutos_percentual; ?>%;"></div>
                     </div>
+                    <div class="progresso-label"><?php echo round($minutos_percentual); ?>%</div>
                 </div>
-                <div class="card-resumo">
-                    <h3>💤 Sono</h3>
-                    <p><?php
-                    if ($horas_sono > 0 || $minutos_sono > 0) {
-                        echo $horas_sono . "h " . $minutos_sono . "min";
-                    } else {
-                        echo "--";
-                    }
-                    ?></p>
-                    <div class="progresso-bar">
-                        <div class="progresso" style="width: <?php echo $sono_percentual; ?>%;"></div>
+
+                <!-- Macronutrientes -->
+                <div class="card-resumo fade-in-element" style="--card-accent: #f43f5e;">
+                    <span class="card-resumo-icon">🥩</span>
+                    <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px; padding-bottom: 5px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; background: rgba(196, 181, 253, 0.05); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(196, 181, 253, 0.15);">
+                            <span style="color: var(--cor-destaque); font-weight: 600;">Proteínas</span>
+                            <span style="color: var(--cor-destaque); font-weight: 800; font-family: var(--fonte-titulo);"><?= round($proteinas_hoje) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; background: rgba(196, 181, 253, 0.05); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(196, 181, 253, 0.15);">
+                            <span style="color: var(--cor-destaque); font-weight: 600;">Hidratos de Carbono</span>
+                            <span style="color: var(--cor-destaque); font-weight: 800; font-family: var(--fonte-titulo);"><?= round($carbs_hoje) ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; background: rgba(196, 181, 253, 0.05); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(196, 181, 253, 0.15);">
+                            <span style="color: var(--cor-destaque); font-weight: 600;">Gorduras</span>
+                            <span style="color: var(--cor-destaque); font-weight: 800; font-family: var(--fonte-titulo);"><?= round($gorduras_hoje) ?></span>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="dashboard-pastas" class="fade-in-element">
-            <div class="grid-pastas">
-                <!-- Pasta Objetivos -->
-                <div class="pasta" style="cursor: pointer;" onclick="openObjetivosModal()">
-                    <div class="pasta-header">
-                        <i class="fa-solid fa-arrows-left-right"></i>
-                    </div>
-                    <div class="pasta-content">
-                        <h3>Objetivos</h3>
-                        <p>4 itens</p>
-                    </div>
-                </div>
-
-                <!-- Pasta Progresso -->
-                <div class="pasta">
-                    <div class="pasta-header">
-                        <i class="fa-solid fa-arrows-left-right"></i>
-                    </div>
-                    <div class="pasta-content">
-                        <h3>Progresso</h3>
-                        <p>3 gráficos</p>
-                    </div>
-                </div>
-
-                <!-- Card Peso Corporal -->
-                <div class="card-grande">
-                    <div class="card-grande-header">
-                        <span>Peso Corporal</span>
-                        <i class="fa-solid fa-arrows-left-right"></i>
-                    </div>
-                    <div class="card-grande-body">
-                        <?php if ($peso_atual): ?>
-                            <span><?php echo number_format($peso_atual, 1); ?></span>
-                        <?php else: ?>
-                            <span>--</span>
-                        <?php endif; ?>
+        <!-- Peso Corporal Destaque -->
+        <section id="peso-destaque" class="fade-in-element">
+            <div class="card-peso">
+                <div class="card-peso-left">
+                    <div class="card-peso-label">Peso Corporal</div>
+                    <div class="card-peso-valor">
+                        <?php echo $peso_atual ? number_format($peso_atual, 1) : '--'; ?>
                         <span class="unidade">kg</span>
                     </div>
-                    <div class="card-grande-footer">
-                        <?php if ($data_peso): ?>
-                            <?php
-                            $data_diff = (time() - strtotime($data_peso)) / 3600; // diferença em horas
-                            if ($data_diff < 24) {
-                                echo "Registado há " . round($data_diff) . " horas";
+                    <div class="card-peso-footer">
+                        <?php if ($data_peso):
+                            $data_diff_segundos = time() - strtotime($data_peso);
+                            $data_diff_horas = abs($data_diff_segundos) / 3600;
+                            
+                            if ($data_diff_horas < 1) {
+                                $minutos = round(abs($data_diff_segundos) / 60);
+                                echo "Registado há " . $minutos . " min";
+                            } elseif ($data_diff_horas < 24) {
+                                echo "Registado há " . round($data_diff_horas) . " horas";
                             } else {
-                                $dias = round($data_diff / 24);
+                                $dias = round($data_diff_horas / 24);
                                 echo "Registado há " . $dias . " dia" . ($dias > 1 ? "s" : "");
                             }
-                            ?>
-                        <?php else: ?>
-                            <span>Nenhum registo ainda</span>
-                        <?php endif; ?>
+                        else:
+                            echo "Nenhum registo ainda";
+                        endif; ?>
+                    </div>
+                </div>
+                <div class="card-peso-icon">
+                    <i class="fas fa-weight-scale"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Módulos -->
+        <section id="modulos" class="fade-in-element">
+            <h2 class="section-title">Módulos</h2>
+            <div class="grid-modulos">
+
+                <!-- Objetivos -->
+                <div class="modulo-card dark" onclick="openObjetivosModal()" style="cursor:pointer;">
+                    <div class="modulo-icon"><i class="fas fa-bullseye"></i></div>
+                    <div>
+                        <p class="modulo-nome">Objetivos</p>
+                        <p class="modulo-sub"><?php echo $habitos_concluidos; ?>/<?php echo $habitos_total; ?>
+                            concluídos</p>
+                    </div>
+                    <?php if ($habitos_total > 0): ?>
+                        <div class="desafios-progress">
+                            <div class="desafios-progress-fill"
+                                style="width: <?php echo round($habitos_total > 0 ? ($habitos_concluidos / $habitos_total) * 100 : 0); ?>%;">
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Progresso -->
+                <div class="modulo-card" onclick="openProgressoModal()" style="cursor:pointer;">
+                    <div class="modulo-icon"><i class="fas fa-chart-line"></i></div>
+                    <div>
+                        <p class="modulo-nome">Progresso</p>
+                        <p class="modulo-sub">2 gráficos de evolução</p>
                     </div>
                 </div>
 
-                <!-- Card Dica -->
-                <div class="card-pequeno">
-                    <div class="pasta-header">
-                        <i class="fa-solid fa-arrows-left-right"></i>
-                    </div>
-                    <div class="pasta-content">
-                        <h3>Dica do Dia</h3>
+                <!-- Dica do Dia -->
+                <div class="modulo-card">
+                    <div class="modulo-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div id="dica-container">
+                        <p class="modulo-nome">Dica do Dia</p>
+                        <p class="modulo-sub" id="dica-texto">Carregando dica...</p>
                     </div>
                 </div>
 
-                <!-- Card Nutrição -->
-                <div class="card-pequeno">
-                    <div class="pasta-header">
-                        <i class="fa-solid fa-arrows-left-right"></i>
-                    </div>
-                    <div class="pasta-content">
-                        <h3>Nutrição</h3>
+                <!-- Nutrição -->
+                <div class="modulo-card accent" onclick="openNutricaoModal()" style="cursor:pointer;">
+                    <div class="modulo-icon"><i class="fas fa-apple-whole"></i></div>
+                    <div>
+                        <p class="modulo-nome">Nutrição</p>
+                        <p class="modulo-sub">Pesquisar alimentos</p>
                     </div>
                 </div>
+
             </div>
         </section>
     </main>
 
-    <nav class="navbar">
-        <a href="dashboard.php" class="nav-link active"><i class="fas fa-home icon"></i> <span
-                class="text">Início</span></a>
-        <a href="treinos.php" class="nav-link"><i class="fas fa-dumbbell icon"></i> <span
-                class="text">Treinos</span></a>
-        <a href="progresso.php" class="nav-link"><i class="fas fa-chart-line icon"></i> <span
-                class="text">Progresso</span></a>
-        <a href="chatbot.php" class="nav-link"><i class="fas fa-robot icon"></i> <span class="text">Chatbot</span></a>
-        <a href="perfil.php" class="nav-link"><i class="fas fa-user icon"></i> <span class="text">Perfil</span></a>
-    </nav>
+    <!-- ══════════ NAVBAR ══════════ -->
+    <?php include 'app_navbar.php'; ?>
 
-    <!-- Modal Objetivos -->
+    <!-- ══════════ MODAL OBJETIVOS ══════════ -->
     <div class="modal-overlay" id="objetivosModal">
         <div class="modal-content">
+            <div class="modal-handle"></div>
             <div class="modal-header">
                 <h2>Objetivos Diários</h2>
-                <button class="close-btn" onclick="closeObjetivosModal()">&times;</button>
+                <button class="close-btn" onclick="closeObjetivosModal()"><i class="fas fa-times"></i></button>
             </div>
 
             <div class="objetivos-section">
@@ -357,34 +538,195 @@ $sono_percentual = $sono_meta_minutos > 0 ? min(100, ($sono_total_minutos / $son
             </div>
 
             <div class="objetivos-section">
-                <h3>Alimentação (Food Search)</h3>
-                <p style="font-size: 0.9em; color: var(--cor-texto); margin-bottom: 10px;">Pesquise um alimento para ver
-                    as suas calorias e marca, através da Open Food Facts.</p>
-                <div class="search-bar">
-                    <input type="text" id="food-search-input" placeholder="Ex: Arroz, Aveia, Frango...">
-                    <button onclick="searchFood()">Procurar</button>
+                <h3>Meus Desafios</h3>
+                <?php if (!empty($habitos_user)): ?>
+                    <div class="desafios-lista">
+                        <?php foreach ($habitos_user as $habito): ?>
+                            <div class="desafio-card" id="card-habito-<?php echo $habito['id_habito']; ?>">
+                                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                                    <input type="checkbox" id="habito-<?php echo $habito['id_habito']; ?>"
+                                        onchange="toggleHabit(<?php echo $habito['id_habito']; ?>, this.checked)" <?php echo $habito['concluido'] ? 'checked' : ''; ?>
+                                        style="margin-top:4px; width:18px; height:18px; accent-color:var(--cor-destaque); cursor:pointer;">
+                                    <div style="flex:1;">
+                                        <h4 style="<?php echo $habito['concluido'] ? 'text-decoration:line-through;opacity:0.5;' : ''; ?>"
+                                            id="desc-habito-<?php echo $habito['id_habito']; ?>">
+                                            <?php echo htmlspecialchars($habito['descricao']); ?>
+                                        </h4>
+                                        <div class="desafio-detalhes" id="detalhes-habito-<?php echo $habito['id_habito']; ?>"
+                                            style="<?php echo $habito['concluido'] ? 'opacity:0.5;' : ''; ?>">
+                                            <span class="badge-tipo">
+                                                <i class="fa-solid fa-tag" style="font-size:0.8em;"></i>
+                                                <?php echo htmlspecialchars($habito['tipo']); ?>
+                                            </span>
+                                            <span class="meta-texto">Meta:
+                                                <?php echo htmlspecialchars($habito['meta_diaria']); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p style="font-size:0.9em; color:#64748b;">Ainda não tens desafios adicionados.</p>
+                <?php endif; ?>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════ MODAL NUTRIÇÃO EXPANDIDO ══════════ -->
+    <div class="modal-overlay" id="nutricaoModal">
+        <div class="modal-content modal-nutricao-full">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h2>Registo Nutricional</h2>
+                <button class="close-btn" onclick="closeNutricaoModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="search-section">
+                    <div class="search-bar">
+                        <input type="text" id="food-search-input" placeholder="Pesquisar alimento ou marca...">
+                        <button onclick="searchFood()"><i class="fas fa-search"></i></button>
+                    </div>
+                    <div id="loading-food" style="display:none; text-align:center; padding:10px;">
+                        <i class="fas fa-spinner fa-spin"></i> A procurar...
+                    </div>
+                    <div class="food-results" id="food-results-container"></div>
                 </div>
-                <div class="food-results" id="food-results-container">
-                    <!-- Resultados da pesquisa aparecerão aqui -->
-                </div>
-                <div class="food-detail" id="food-detail-container">
-                    <!-- Detalhes do alimento selecionado aparecerão aqui -->
+
+                <div class="selection-section">
+                    <h3>Lista da Refeição <span id="items-count" class="badge">0</span></h3>
+                    <div id="selected-foods-list" class="selected-foods-list">
+                        <!-- Itens selecionados aparecerão aqui -->
+                        <div class="empty-selection">Nenhum alimento selecionado</div>
+                    </div>
+                    
+                    <div class="selection-footer" id="selection-footer" style="display:none; padding-bottom: 20px;">
+                        <div class="total-macros-summary">
+                            <div><strong>Total:</strong> <span id="total-calories-display">0</span> kcal</div>
+                            <div class="macros-grid-mini">
+                                <span>P: <span id="total-prot-display">0</span>g</span>
+                                <span>C: <span id="total-carb-display">0</span>g</span>
+                                <span>G: <span id="total-fat-display">0</span>g</span>
+                            </div>
+                        </div>
+                        
+                        <div class="meal-registration-form">
+                            <select id="meal-type-select" class="input-modern">
+                                <option value="Pequeno-almoço">Pequeno-almoço</option>
+                                <option value="Almoço">Almoço</option>
+                                <option value="Lanche">Lanche</option>
+                                <option value="Jantar">Jantar</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                            <button onclick="saveMeal()" class="btn-save-meal">
+                                <i class="fas fa-check"></i> Registar Refeição
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ══════════ MODAL PROGRESSO (CHART.JS) ══════════ -->
+    <div class="modal-overlay" id="progressoModal">
+        <div class="modal-content modal-nutricao-full" style="max-width: 800px;">
+            <div class="modal-handle"></div>
+            <div class="modal-header">
+                <h2>Evolução Visual</h2>
+                <button class="close-btn" onclick="closeProgressoModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="modal-body" style="grid-template-columns: 1fr; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
+                <div class="card-progresso" style="padding: 15px; background: rgba(196, 181, 253, 0.05); border-radius: 12px; border: 1px solid rgba(196, 181, 253, 0.15);">
+                    <h4 style="margin: 0 0 10px; color: var(--cor-destaque);">Evolução do Peso Corporal</h4>
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- NOVO GRÁFICO: Volume Global Levantado -->
+                <div class="card-progresso" style="padding: 15px; background: rgba(196, 181, 253, 0.05); border-radius: 12px; border: 1px solid rgba(196, 181, 253, 0.15);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; flex-wrap: wrap;">
+                        <h4 style="margin: 0; color: var(--cor-destaque);">Volume Semanal (Força)</h4>
+                        <?php if($aumento_percentual !== 0): ?>
+                            <div style="font-size: 0.85em; font-weight: bold; color: <?= $cor_aumento ?>; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 6px; border: 1px solid <?= $cor_aumento ?>40;">
+                                <?= $icone_aumento ?> <?= number_format(abs($aumento_percentual), 1) ?>% vs sem. ant.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div style="height: 250px; width: 100%;">
+                        <?php if (empty($historico_forca_global)): ?>
+                            <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:0.9em; text-align:center;">
+                                <p>Sem treinos suficientes.</p>
+                            </div>
+                        <?php else: ?>
+                            <canvas id="globalStrengthChart"></canvas>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="card-progresso" style="padding: 15px; background: rgba(196, 181, 253, 0.05); border-radius: 12px; border: 1px solid rgba(196, 181, 253, 0.15);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 10px;">
+                        <h4 style="margin:0; color: var(--cor-destaque);">Força por Exercício</h4>
+                        <select id="select-exercicio-grafico" class="input-modern" style="padding: 4px 8px; font-size: 0.85em; width: auto; border: 1px solid rgba(196, 181, 253, 0.2); border-radius: 6px; background: white;" onchange="updateStrengthChart(this.value)">
+                            <option value="">Selecionar exercício...</option>
+                            <?php foreach($exercicios_com_hist as $ex_h): ?>
+                                <option value="<?= $ex_h['id_exercicio'] ?>"><?= htmlspecialchars($ex_h['nome_exercicio']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="strengthChart"></canvas>
+                        <div id="no-strength-data" style="display:flex; align-items:center; justify-content:center; height:100%; color:#94a3b8; font-size:0.9em;">
+                            Selecione um exercício para ver o gráfico
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════ JS INíCIO ══════════ -->
     <script>
+        // ══════════ OBJETIVOS MODAL ══════════
         function openObjetivosModal() {
             document.getElementById('objetivosModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeObjetivosModal() {
             document.getElementById('objetivosModal').classList.remove('active');
-            // Resetar a pesquisa ao fechar
-            document.getElementById('food-search-input').value = '';
-            document.getElementById('food-results-container').innerHTML = '';
-            document.getElementById('food-detail-container').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ══════════ DICA DO DIA ══════════
+        async function loadDica() {
+            try {
+                const response = await fetch('API/dicas.json');
+                const dicas = await response.json();
+                const dicaAleatoria = dicas[Math.floor(Math.random() * dicas.length)];
+                document.getElementById('dica-texto').textContent = dicaAleatoria.texto;
+            } catch (error) {
+                document.getElementById('dica-texto').textContent = "Treina com consistência!";
+            }
+        }
+        loadDica();
+
+        // ══════════ NUTRIÇÃO AVANÇADA ══════════
+        let selectedFoods = [];
+
+        function openNutricaoModal() {
+            document.getElementById('nutricaoModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('food-search-input').focus(), 100);
+        }
+
+        function closeNutricaoModal() {
+            document.getElementById('nutricaoModal').classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         async function searchFood() {
@@ -392,59 +734,336 @@ $sono_percentual = $sono_meta_minutos > 0 ? min(100, ($sono_total_minutos / $son
             if (!query) return;
 
             const resultsContainer = document.getElementById('food-results-container');
-            const detailContainer = document.getElementById('food-detail-container');
+            const loader = document.getElementById('loading-food');
 
-            resultsContainer.innerHTML = '<p>A procurar...</p>';
-            detailContainer.classList.remove('active');
+            resultsContainer.innerHTML = '';
+            loader.style.display = 'block';
 
             try {
-                // Fazer a pesquisa usando a API Open Food Facts v2
-                const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=10`);
+                const response = await fetch(`proxy_food.php?search_terms=${encodeURIComponent(query)}`);
                 const data = await response.json();
+                loader.style.display = 'none';
 
                 if (data.products && data.products.length > 0) {
-                    resultsContainer.innerHTML = '';
-                    // Mostrar top 10 produtos
                     data.products.forEach(product => {
-                        // Obter marca e calorias
-                        const brand = product.brands ? product.brands.split(',')[0] : 'Marca Desconhecida';
-                        const productName = product.product_name || 'Produto Sem Nome';
-                        let calories = 'N/A';
+                        if (!product.product_name) return;
 
-                        // Obter calorias se existirem
-                        if (product.nutriments) {
-                            if (product.nutriments['energy-kcal_100g'] !== undefined) {
-                                calories = product.nutriments['energy-kcal_100g'] + ' kcal / 100g';
-                            } else if (product.nutriments['energy-kcal_value'] !== undefined) {
-                                calories = product.nutriments['energy-kcal_value'] + ' kcal';
-                            }
-                        }
+                        const name = product.product_name;
+                        const brand = product.brands ? product.brands.split(',')[0] : 'Marca genérica';
+                        const image = product.image_front_small_url || product.image_small_url || 'assets/fotos/default-food.png';
+                        
+                        // Nutrientes por 100g
+                        const cals = product.nutriments?.['energy-kcal_100g'] || product.nutriments?.['energy-kcal_value'] || 0;
+                        const prot = product.nutriments?.['proteins_100g'] || 0;
+                        const carbs = product.nutriments?.['carbohydrates_100g'] || 0;
+                        const fat = product.nutriments?.['fat_100g'] || 0;
 
-                        const btn = document.createElement('button');
-                        btn.className = 'food-result-btn';
-                        btn.textContent = productName;
-                        btn.onclick = () => showFoodDetail(productName, calories, brand);
-
-                        resultsContainer.appendChild(btn);
+                        const card = document.createElement('div');
+                        card.className = 'food-search-card';
+                        card.innerHTML = `
+                            <img src="${image}" alt="${name}" onerror="this.src='assets/fotos/default-food.png'">
+                            <div class="food-info">
+                                <strong>${name}</strong>
+                                <span>${brand} • ${Math.round(cals)} kcal/100g</span>
+                            </div>
+                            <button class="btn-add-item" onclick="addFoodToSelection('${name.replace(/'/g, "\\'")}', ${cals}, ${prot}, ${carbs}, ${fat}, '${image}')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        `;
+                        resultsContainer.appendChild(card);
                     });
                 } else {
-                    resultsContainer.innerHTML = '<p>Nenhum produto encontrado com esse nome.</p>';
+                    resultsContainer.innerHTML = '<p class="no-results">Nenhum alimento encontrado.</p>';
                 }
             } catch (error) {
-                console.error('Erro na pesquisa:', error);
-                resultsContainer.innerHTML = '<p>Ocorreu um erro ao pesquisar os alimentos. Tente novamente.</p>';
+                loader.style.display = 'none';
+                resultsContainer.innerHTML = '<p class="error-msg">Erro na pesquisa. Tenta novamente.</p>';
             }
         }
 
-        function showFoodDetail(name, calories, brand) {
-            const detailContainer = document.getElementById('food-detail-container');
-            detailContainer.innerHTML = `
-                <h4 style="margin:0 0 10px 0; color:var(--cor-destaque);">${name}</h4>
-                <p style="margin:5px 0;"><strong>Marca:</strong> ${brand}</p>
-                <p style="margin:5px 0;"><strong>Calorias:</strong> ${calories}</p>
-            `;
-            detailContainer.classList.add('active');
+        function addFoodToSelection(name, cals, prot, carbs, fat, image) {
+            const id = Date.now();
+            selectedFoods.push({ id, name, calsPer100: cals, protPer100: prot, carbsPer100: carbs, fatPer100: fat, weight: 100, image });
+            updateSelectedFoodsUI();
         }
+
+        function updateSelectedFoodsUI() {
+            const container = document.getElementById('selected-foods-list');
+            const footer = document.getElementById('selection-footer');
+            const countBadge = document.getElementById('items-count');
+
+            if (selectedFoods.length === 0) {
+                container.innerHTML = '<div class="empty-selection">Nenhum alimento selecionado</div>';
+                footer.style.display = 'none';
+                countBadge.textContent = '0';
+                return;
+            }
+
+            footer.style.display = 'block';
+            countBadge.textContent = selectedFoods.length;
+            container.innerHTML = '';
+
+            let totalCals = 0, totalProt = 0, totalCarbs = 0, totalFat = 0;
+
+            selectedFoods.forEach(food => {
+                const ratio = food.weight / 100;
+                const cals = food.calsPer100 * ratio;
+                const prot = food.protPer100 * ratio;
+                const carbs = food.carbsPer100 * ratio;
+                const fat = food.fatPer100 * ratio;
+
+                totalCals += cals;
+                totalProt += prot;
+                totalCarbs += carbs;
+                totalFat += fat;
+
+                const item = document.createElement('div');
+                item.className = 'selected-food-item';
+                item.innerHTML = `
+                    <div class="item-main">
+                        <strong>${food.name}</strong>
+                        <div class="item-controls">
+                            <input type="number" value="${food.weight}" min="1" onchange="updateFoodWeight(${food.id}, this.value)">
+                            <span>g</span>
+                        </div>
+                    </div>
+                    <div class="item-details">
+                        ${Math.round(cals)} kcal | P: ${prot.toFixed(1)}g | C: ${carbs.toFixed(1)}g | G: ${fat.toFixed(1)}g
+                        <button class="btn-remove" onclick="removeFood(${food.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            document.getElementById('total-calories-display').textContent = Math.round(totalCals);
+            document.getElementById('total-prot-display').textContent = totalProt.toFixed(1);
+            document.getElementById('total-carb-display').textContent = totalCarbs.toFixed(1);
+            document.getElementById('total-fat-display').textContent = totalFat.toFixed(1);
+        }
+
+        function updateFoodWeight(id, weight) {
+            const food = selectedFoods.find(f => f.id === id);
+            if (food) {
+                food.weight = parseFloat(weight) || 0;
+                updateSelectedFoodsUI();
+            }
+        }
+
+        function removeFood(id) {
+            selectedFoods = selectedFoods.filter(f => f.id !== id);
+            updateSelectedFoodsUI();
+        }
+
+        async function saveMeal() {
+            if (selectedFoods.length === 0) return;
+
+            const mealType = document.getElementById('meal-type-select').value;
+            const totalCals = document.getElementById('total-calories-display').textContent;
+            const totalProt = document.getElementById('total-prot-display').textContent;
+            const totalCarbs = document.getElementById('total-carb-display').textContent;
+            const totalFat = document.getElementById('total-fat-display').textContent;
+            
+            const description = selectedFoods.map(f => `${f.name} (${f.weight}g)`).join(', ');
+
+            try {
+                const formData = new FormData();
+                formData.append('calorias', totalCals);
+                formData.append('proteinas', totalProt);
+                formData.append('carbs', totalCarbs);
+                formData.append('gorduras', totalFat);
+                formData.append('refeicao', mealType);
+                formData.append('descricao', description);
+                formData.append('data', new Date().toISOString().split('T')[0]);
+
+                const response = await fetch('salvar_alimentacao.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    alert('Refeição registada com sucesso!');
+                    location.reload();
+                } else {
+                    alert('Erro ao guardar: ' + result.message);
+                }
+            } catch (error) {
+                alert('Erro na ligação ao servidor.');
+            }
+        }
+
+        document.getElementById('food-search-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') searchFood();
+        });
+
+        // ══════════ GRÁFICOS (CHART.JS) ══════════
+        function openProgressoModal() {
+            document.getElementById('progressoModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Inicializar o gráfico de peso se ainda não existir
+            if (!window.weightChartInstance) {
+                const ctxWeight = document.getElementById('weightChart').getContext('2d');
+                window.weightChartInstance = new Chart(ctxWeight, {
+                    type: 'line',
+                    data: {
+                        labels: <?= json_encode($datas_peso_js) ?>,
+                        datasets: [{
+                            label: 'Peso (kg)',
+                            data: <?= json_encode($valores_peso_js) ?>,
+                            borderColor: '#a78bfa',
+                            backgroundColor: 'rgba(167, 139, 250, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#a78bfa',
+                            pointRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: false, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // Inicializar o gráfico de Volume Global
+            const canvasGlobal = document.getElementById('globalStrengthChart');
+            if (canvasGlobal && !window.globalStrengthChartInstance) {
+                const ctxGlobal = canvasGlobal.getContext('2d');
+                
+                window.globalStrengthChartInstance = new Chart(ctxGlobal, {
+                    type: 'bar',
+                    data: {
+                        labels: <?= json_encode($datas_forca_js) ?>,
+                        datasets: [{
+                            label: 'Volume Total (kg x reps)',
+                            data: <?= json_encode($valores_forca_js) ?>,
+                            backgroundColor: 'rgba(34, 197, 94, 0.6)',
+                            borderColor: '#22c55e',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.raw.toLocaleString('pt-PT') + ' kg movidos';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function closeProgressoModal() {
+            document.getElementById('progressoModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        async function updateStrengthChart(idEx) {
+            const canvas = document.getElementById('strengthChart');
+            const noData = document.getElementById('no-strength-data');
+            
+            if (!idEx) {
+                canvas.style.display = 'none';
+                noData.style.display = 'flex';
+                return;
+            }
+
+            try {
+                const response = await fetch(`get_ex_history.php?id_exercicio=${idEx}`);
+                const data = await response.json();
+
+                if (data.success && data.history.length > 0) {
+                    noData.style.display = 'none';
+                    canvas.style.display = 'block';
+
+                    const labels = data.history.map(h => h.data);
+                    const values = data.history.map(h => h.max_peso);
+
+                    if (window.strengthChartInstance) {
+                        window.strengthChartInstance.destroy();
+                    }
+
+                    window.strengthChartInstance = new Chart(canvas.getContext('2d'), {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Peso Máximo (kg)',
+                                data: values,
+                                borderColor: '#fb7185',
+                                backgroundColor: 'rgba(251, 113, 133, 0.1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.3,
+                                pointBackgroundColor: '#fb7185'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                y: { beginAtZero: true },
+                                x: { grid: { display: false } }
+                            }
+                        }
+                    });
+                } else {
+                    canvas.style.display = 'none';
+                    noData.style.display = 'flex';
+                    noData.textContent = "Sem histórico suficiente para este exercício.";
+                }
+            } catch (error) {
+                console.error("Erro ao carregar histórico:", error);
+            }
+        }
+
+        async function toggleHabit(idHabito, concluido) {
+            const desc = document.getElementById('desc-habito-' + idHabito);
+            const detalhes = document.getElementById('detalhes-habito-' + idHabito);
+            if (concluido) {
+                desc.style.textDecoration = 'line-through';
+                desc.style.opacity = '0.5';
+                detalhes.style.opacity = '0.5';
+            } else {
+                desc.style.textDecoration = 'none';
+                desc.style.opacity = '1';
+                detalhes.style.opacity = '1';
+            }
+            try {
+                const formData = new FormData();
+                formData.append('id_habito', idHabito);
+                formData.append('concluido', concluido ? 1 : 0);
+                const response = await fetch('update_checklist.php', { method: 'POST', body: formData });
+                const result = await response.json();
+                if (!result.success) alert("Erro ao atualizar o desafio. Tenta novamente.");
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+
+        document.getElementById('food-search-input').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') searchFood();
+        });
     </script>
 </body>
 

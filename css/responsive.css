@@ -1,0 +1,460 @@
+/* ══════════════════════════════════════════════
+   BerserkFit — Responsividade Global (Mobile)
+   Aplica-se a TODAS as páginas internas da app.
+   ══════════════════════════════════════════════ */
+
+/* ── TABLET (≤768px) ── */
+@media (max-width: 768px) {
+
+    /* Dashboard */
+    .modules-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .calendar {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+    .calendar-day {
+        font-size: 0.75rem;
+        padding: 6px 8px;
+    }
+
+    /* Progresso */
+    .progresso-grid,
+    .cards-progresso,
+    .grid-progresso {
+        grid-template-columns: 1fr !important;
+    }
+    .card-progresso {
+        padding: 18px;
+    }
+    .meta-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start !important;
+    }
+    .valor-destaque {
+        font-size: 2rem;
+    }
+
+    /* Heatmap (Day Streak) */
+    .heatmap-grid {
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 4px;
+    }
+    .heatmap-day {
+        width: 100% !important;
+        aspect-ratio: 1/1;
+        height: auto !important;
+    }
+
+    /* Treinos */
+    .treinos-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .treino-card {
+        padding: 18px;
+    }
+    .timer-controls {
+        flex-wrap: wrap;
+    }
+    .timer-display {
+        font-size: 2.2rem;
+    }
+    .exercicio-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    /* Perfil */
+    .profile-container-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .feed-layout {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Configurações */
+    .settings-container {
+        padding: 12px;
+    }
+    .settings-section {
+        padding: 18px;
+    }
+    .settings-action {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    .settings-action .btn-primary,
+    .settings-action .btn-secondary {
+        width: 100%;
+    }
+
+    /* Admin */
+    .admin-grid,
+    .admin-cards-grid,
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .admin-table-wrapper {
+        overflow-x: auto;
+        margin: 0 -15px;
+        padding: 0 15px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .users-table, .data-table {
+        min-width: 600px;
+    }
+
+    /* Chatbot */
+    .chat-container, .chatbot-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 0;
+        height: calc(100vh - 180px) !important;
+    }
+    .chat-sidebar {
+        position: absolute;
+        left: -100%;
+        top: 0;
+        height: 100%;
+        width: 85%;
+        z-index: 1002;
+        background: var(--cor-primaria) !important;
+    }
+    .chat-sidebar.active {
+        left: 0;
+    }
+
+    /* Editar Perfil */
+    .edit-container {
+        margin: 20px 12px;
+        padding: 20px;
+    }
+
+    /* Alterar Senha */
+    .senha-container {
+        padding: 12px;
+    }
+    .senha-card {
+        padding: 22px 18px;
+    }
+    .otp-wrapper {
+        gap: 6px;
+    }
+    .otp-digit {
+        width: 42px;
+        height: 52px;
+        font-size: 1.3rem;
+    }
+
+    /* Footer */
+    footer {
+        padding: 30px 20px 15px;
+    }
+    .footer-container {
+        grid-template-columns: 1fr !important;
+        gap: 25px;
+    }
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+    }
+    .footer-legal a {
+        margin-left: 0;
+        margin-right: 15px;
+    }
+
+    /* Modais */
+    .modal-content {
+        width: 95% !important;
+        max-width: 95vw !important;
+        margin: 10px auto;
+        padding: 18px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    /* Login / Registro */
+    .login-container {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+    .login-box h1 {
+        font-size: 1.8em;
+    }
+    .floating-icon {
+        font-size: 40px !important;
+        opacity: 0.3;
+    }
+
+    /* Onboarding */
+    .onboarding-container {
+        padding: 15px;
+    }
+
+    /* 2FA Setup */
+    .container {
+        max-width: 95%;
+    }
+    .card {
+        padding: 1.5rem;
+    }
+    .qr-container img {
+        max-width: 100%;
+        height: auto;
+    }
+    .backup-codes-section .codes-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* 2FA Login */
+    .glass-card {
+        max-width: 95%;
+        padding: 1.5rem;
+        margin: 0 auto;
+    }
+    .otp-container {
+        gap: 0.35rem;
+    }
+    .otp-input {
+        width: 40px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    /* Escolher Username */
+    .username-box {
+        padding: 2rem 1.5rem;
+    }
+    .username-box h1 {
+        font-size: 1.6rem;
+    }
+}
+
+/* ── ═══ FLOATING ICONS (GLOBAL) ═══ ── */
+.floating-icons-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.floating-icon {
+    position: absolute;
+    font-size: clamp(40px, 8vw, 80px);
+    color: var(--cor-destaque);
+    animation: float 10s ease-in-out infinite;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+    opacity: 0.15;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-100px) rotate(180deg); }
+    100% { transform: translateY(0) rotate(360deg); }
+}
+
+.floating-icon:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; font-size: 90px; }
+.floating-icon:nth-child(2) { top: 60%; left: 5%; animation-delay: 2s; animation-duration: 12s; }
+.floating-icon:nth-child(3) { top: 10%; left: 85%; animation-delay: 4s; font-size: 70px; }
+.floating-icon:nth-child(4) { top: 80%; left: 90%; animation-delay: 6s; animation-duration: 14s; }
+.floating-icon:nth-child(5) { top: 50%; left: 40%; animation-delay: 1s; }
+.floating-icon:nth-child(6) { top: 30%; left: 60%; animation-delay: 3s; animation-duration: 11s; }
+
+
+/* ── MOBILE SMALL (≤480px) ── */
+@media (max-width: 480px) {
+
+    /* Geral */
+    main {
+        padding: 12px 10px;
+    }
+
+    /* Header */
+    .header-greeting h2 {
+        font-size: 1.4em;
+    }
+    .app-title {
+        font-size: 1.2em;
+    }
+    .header-actions {
+        gap: 6px;
+    }
+    .streak-counter {
+        font-size: 0.78em;
+        padding: 4px 10px;
+    }
+    .btn-admin {
+        font-size: 0.7em;
+        padding: 4px 10px;
+    }
+
+    /* Dashboard Cards */
+    .card-modulo {
+        padding: 16px;
+    }
+    .card-modulo h3 {
+        font-size: 1.05rem;
+    }
+
+    /* Progresso Tabs */
+    .progresso-tabs,
+    .abas-progresso {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .progresso-tabs button,
+    .aba-btn {
+        font-size: 0.8rem;
+        padding: 8px 12px;
+        flex: 1;
+        min-width: 100px;
+    }
+    .form-progresso {
+        padding: 15px;
+    }
+    .form-progresso input,
+    .form-progresso select {
+        font-size: 0.9rem;
+    }
+
+    /* Nutrição / Food Search */
+    .food-result-btn {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    #food-results-progresso > div,
+    #food-results-container > div {
+        flex-direction: column;
+        text-align: center;
+    }
+    #food-results-progresso > div img,
+    #food-results-container > div img {
+        margin: 0 auto 8px;
+    }
+    .ler-text {
+        display: none;
+    }
+
+    /* Day Streak Heatmap */
+    .heatmap-grid {
+        gap: 2px;
+    }
+    .streak-stat-card {
+        padding: 12px 8px;
+    }
+    .streak-stat-valor {
+        font-size: 1.5rem;
+    }
+
+    /* Treinos */
+    .btn-timer {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+    }
+
+    /* Configurações */
+    .settings-header h1 {
+        font-size: 1.4rem;
+    }
+    .settings-section h2 {
+        font-size: 1.05rem;
+    }
+
+    /* Chatbot */
+    .chat-messages {
+        max-height: none;
+        padding: 15px;
+    }
+    .chat-footer {
+        padding: 10px 15px;
+    }
+    .chat-input-wrapper {
+        padding: 2px 10px 2px 15px;
+        gap: 10px;
+    }
+    .message {
+        max-width: 90%;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    /* Login */
+    .login-box h1 {
+        font-size: 1.5em;
+        margin-bottom: 25px;
+    }
+    .btn-signin, .btn-google {
+        padding: 12px;
+        font-size: 0.9em;
+    }
+
+    /* Footer */
+    .footer-column h3 {
+        font-size: 1.8em;
+    }
+    .newsletter-form {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .newsletter-form button {
+        width: 100%;
+    }
+
+    /* Alterar Senha */
+    .passo-header h1 {
+        font-size: 1.15rem;
+    }
+    .otp-digit {
+        width: 36px;
+        height: 46px;
+        font-size: 1.1rem;
+    }
+
+    /* 2FA */
+    .title {
+        font-size: 1.2rem;
+    }
+
+    /* Modais de histórico */
+    .modal-header h4 {
+        font-size: 1rem;
+    }
+}
+
+/* ── EXTRA SMALL (≤360px) ── */
+@media (max-width: 360px) {
+    .header-greeting h2 {
+        font-size: 1.2em;
+    }
+    .nav-link {
+        padding: 9px 6px;
+    }
+    .otp-input {
+        width: 34px;
+        height: 44px;
+        font-size: 1rem;
+    }
+    .otp-digit {
+        width: 32px;
+        height: 42px;
+    }
+    .login-box h1 {
+        font-size: 1.3em;
+    }
+    .card {
+        padding: 1.2rem;
+    }
+    .glass-card {
+        padding: 1.2rem;
+    }
+    .streak-stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}

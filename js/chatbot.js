@@ -9,14 +9,17 @@ const sendBtn = document.getElementById('send-btn');
 const typingIndicator = document.getElementById('typing-indicator');
 
 // API Key do Google Gemini
-const API_KEY = 'x';
+const API_KEY = 'AIzaSyCq9rrvuI2P-vf9IuQfTEId31IPUgv_frY';
 
-// Histórico da conversa para manter contexto
+// Variáveis Globais Injetadas pelo PHP (History)
+let currentSessionId = (typeof PHP_LOADED_SESSION_ID !== 'undefined') ? PHP_LOADED_SESSION_ID : null;
+
+// Histórico da conversa para manter contexto (Default)
 let conversationHistory = [
     {
         role: "user",
         parts: [{
-            text: `Tu és um Personal Trainer virtual profissional, motivador e seguro chamado BerserkFit AI. 
+            text: `Tu és um Personal Trainer virtual profissional, inteligente, motivador e seguro chamado Oráculo. 
 
 O teu papel no chat é:
 1. Fazer perguntas sobre: Objetivo, Experiência atual, Limitações físicas, Idade, peso, altura, Dias disponíveis para treinar, Equipamentos disponíveis.
@@ -72,21 +75,63 @@ O teu papel no chat é:
 
 5. Responder SEMPRE em português de Portugal (PT-PT), usando termos como “ginásio” em vez de “academia”, “ecrã” em vez de “tela”, etc.
 
+6. PROIBIDO usar nomes de exercícios em inglês (ex: em vez de "Curl Scott" usa "Rosca Scott", em vez de "Bench Press" usa "Supino"). Todas as tuas prescrições devem estar em português correto e técnico.
+
 Mantenha as respostas concisas, formatadas e fáceis de ler no chat. Use markdown para formatar (negrito, listas, etc).`
         }]
     },
     {
         role: "model",
         parts: [{
-            text: "Entendido! Sou o BerserkFit AI, o teu Personal Trainer virtual. Estou aqui para te ajudar a alcançar os teus objetivos com treinos personalizados e muita motivação! 💪🔥"
+            text: "Olá! Sou o Oráculo, o teu Personal Trainer virtual criado com IA. 💪<br><br>Estou aqui para desenhar o treino perfeito para ti ou tirar todas as tuas dúvidas. O que pretendes atacar hoje?"
         }]
     }
 ];
 
+// Re-popula histórico se existe
+if (typeof PHP_LOADED_HISTORY !== 'undefined' && PHP_LOADED_HISTORY && Array.isArray(PHP_LOADED_HISTORY)) {
+    conversationHistory = PHP_LOADED_HISTORY;
+}
+
+// Função para gravar sessão na DB
+async function syncChatToDB() {
+    try {
+        let title = "Nova Conversa";
+        if (conversationHistory.length > 2) {
+            title = conversationHistory[2].parts[0].text.substring(0, 30);
+            if (conversationHistory[2].parts[0].text.length > 30) title += "...";
+        }
+
+        const payload = {
+            id_sessao: currentSessionId,
+            titulo: title,
+            history: conversationHistory
+        };
+
+        const res = await fetch('save_chat.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success && data.id_sessao) {
+            currentSessionId = data.id_sessao;
+            // Altera o URL para refletir a sessão gravada sem dar reload, útil caso atualize a pág
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, "?id=" + currentSessionId);
+            }
+        }
+    } catch (e) {
+        console.error("Erro ao sincronizar histórico: ", e);
+    }
+}
+
 // Função simples para converter Markdown em HTML
 function parseMarkdown(text) {
-    // Remove o bloco JSON se existir para exibição
+    // Remove blocos JSON de treino (ambos os formatos) para exibição limpa
     let html = text.replace(/```json_treino[\s\S]*?```/g, '');
+    html = html.replace(/```json[\s\S]*?```/g, '');
 
     // Headers (## Titulo)
     html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
@@ -100,7 +145,18 @@ function parseMarkdown(text) {
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
     // Listas não ordenadas (- item)
-    html = html.replace(/^\s*-\s+(.*)/gm, '<li>$1</li>');
+    // ADICIONADO: Deteção de exercícios para colocar botão de vídeo
+    html = html.replace(/^\s*-\s+(.*)/gm, (match, content) => {
+        // Tenta isolar o nome do exercício (antes de hífen, parênteses ou números)
+        let nameMatch = content.match(/^([^:\-\(0-9]*)/);
+        let exName = nameMatch ? nameMatch[0].trim() : content;
+
+        if (exName.length > 3 && exName.length < 40) {
+            return `<li>${content} <button class="btn-demo-inline" onclick="openExerciseDemo('${exName.replace(/'/g, "\\'")}')" title="Ver demonstração"><i class="fas fa-play-circle"></i></button></li>`;
+        }
+        return `<li>${content}</li>`;
+    });
+
     // Envolve itens de lista em <ul> (simplificado)
     html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
 
@@ -192,8 +248,45 @@ function generatePDF(content) {
     }
 }
 
+// Função auxiliar — abre o modal e devolve uma Promise com a escolha do utilizador
+function abrirModalGuardar() {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('modalGuardarTreino');
+        if (!modal) { resolve(null); return; }
+
+        modal.classList.add('active');
+
+        const btnSubstituir = document.getElementById('btn-substituir');
+        const btnAdicionar  = document.getElementById('btn-adicionar');
+        const btnCancelar   = document.getElementById('btn-cancelar-guardar');
+
+        function fechar(resultado) {
+            modal.classList.remove('active');
+            // Limpa os listeners para evitar duplicados
+            btnSubstituir.onclick = null;
+            btnAdicionar.onclick  = null;
+            btnCancelar.onclick   = null;
+            resolve(resultado);
+        }
+
+        btnSubstituir.onclick = () => fechar('replace');
+        btnAdicionar.onclick  = () => fechar('append');
+        btnCancelar.onclick   = () => fechar(null);
+
+        // Fecha ao clicar fora
+        modal.onclick = (e) => { if (e.target === modal) fechar(null); };
+    });
+}
+
 // Função para exportar treino para o banco de dados
 async function exportWorkout(data, btnElement) {
+    // Abre o modal personalizado e aguarda a escolha
+    const escolha = await abrirModalGuardar();
+
+    if (escolha === null) return; // Cancelado
+
+    data.actionType = escolha; // 'replace' ou 'append'
+
     const originalText = btnElement.innerHTML;
     btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> A guardar...';
     btnElement.disabled = true;
@@ -243,6 +336,7 @@ async function sendMessage() {
 
     // Mostra indicador de digitação
     typingIndicator.style.display = 'flex';
+    chatBox.scrollTop = chatBox.scrollHeight;
 
     // Adiciona ao histórico
     conversationHistory.push({
@@ -310,6 +404,9 @@ async function sendMessage() {
                 parts: [{ text: botReply }]
             });
 
+            // Sincronizar com a Base de Dados!
+            await syncChatToDB();
+
         } else if (data.error) {
             addMessage(`❌ Erro da API: ${data.error.message}`, 'bot');
             console.error("Erro API:", data);
@@ -342,7 +439,61 @@ userInput.addEventListener('keypress', (e) => {
     }
 });
 
-// Auto-focus no input quando a página carrega
+// Funções do Modal de Demonstração (Chatbot)
+async function openExerciseDemo(name) {
+    const modal = document.getElementById('demoExercicioModal');
+    const body = document.getElementById('demoModalBody');
+    const title = document.getElementById('demoModalTitle');
+
+    title.textContent = name;
+    modal.classList.add('active');
+    body.innerHTML = '<p style="text-align:center; opacity:0.6;">A procurar vídeo...</p>';
+
+    try {
+        const response = await fetch(`proxy_exercicios.php?q=${encodeURIComponent(name)}`);
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const ex = data[0]; // Pega o primeiro resultado
+            body.innerHTML = `
+                <img src="${ex.gifUrl}" class="demo-gif" alt="${ex.name}">
+                <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:8px;">
+                    <p style="margin-bottom:10px;"><strong>Equipamento:</strong> ${ex.equipment}</p>
+                    <p><strong>Músculo Alvo:</strong> ${ex.target}</p>
+                </div>
+            `;
+        } else {
+            body.innerHTML = '<p style="text-align:center;">Não encontrámos um vídeo específico para este exercício.</p>';
+        }
+    } catch (err) {
+        body.innerHTML = '<p style="text-align:center; color:#f87171;">Erro ao ligar à biblioteca.</p>';
+    }
+}
+
+function closeDemoModal() {
+    document.getElementById('demoExercicioModal').classList.remove('active');
+}
+
+// Auto-focus no input quando a página carrega e Renderização Inicial do Histórico!
 window.addEventListener('load', () => {
     userInput.focus();
+
+    // Se carregámos um histórico da BD, limpar a msg default do HTML e desenhar tudo!
+    if (typeof PHP_LOADED_HISTORY !== 'undefined' && PHP_LOADED_HISTORY && Array.isArray(PHP_LOADED_HISTORY)) {
+        chatBox.innerHTML = '';
+        for (let i = 1; i < conversationHistory.length; i++) {
+            let role = conversationHistory[i].role === 'user' ? 'user' : 'bot';
+            // Validar se tem dados de treino para desenhar pdf, extraindo
+            let text = conversationHistory[i].parts[0].text;
+            let workoutData = null;
+            let jsonMatch = text.match(/```json_treino([\s\S]*?)```/) || text.match(/```json([\s\S]*?)```/);
+            if (jsonMatch && role === 'bot') {
+                try {
+                    const potentialJson = JSON.parse(jsonMatch[1]);
+                    if (potentialJson.treinos) workoutData = potentialJson;
+                } catch (e) { }
+            }
+            addMessage(text, role, workoutData);
+        }
+    }
 });

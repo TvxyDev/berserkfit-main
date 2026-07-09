@@ -11,7 +11,7 @@ require 'ligacao.php';
 
 $admin_id = $_SESSION['user_id'];
 
-// Verifica se o utilizador é Admin
+// Verifica se o utilizador é Admin ou SuperAdmin
 $sql_check = "SELECT tipo_usuario FROM user WHERE id_user = ?";
 $stmt = $conn->prepare($sql_check);
 $stmt->bind_param("i", $admin_id);
@@ -26,8 +26,10 @@ if ($result->num_rows === 0) {
 $admin_data = $result->fetch_assoc();
 $stmt->close();
 
-// Verifica se é Admin
-if (!isset($admin_data['tipo_usuario']) || $admin_data['tipo_usuario'] !== 'Admin') {
+$tipo_admin = $admin_data['tipo_usuario'] ?? 'Usuario';
+
+// Verifica se é Admin ou SuperAdmin
+if ($tipo_admin !== 'Admin' && $tipo_admin !== 'SuperAdmin') {
     header("Location: dashboard.php");
     exit;
 }
@@ -139,8 +141,9 @@ $conn->close();
     <title>Detalhes do Utilizador - Admin - BerserkFit</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/admin_usuario.css">
+    <link rel="stylesheet" href="css/global.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/dashboard.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/admin_usuario.css?v=<?= time() ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Inter:wght@400;700&display=swap"
@@ -298,22 +301,24 @@ $conn->close();
         <div class="admin-section">
             <h2><i class="fas fa-tint"></i> Registos de Água (Últimos 30 dias)</h2>
             <?php if (!empty($registros_agua)): ?>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Quantidade (L)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($registros_agua as $reg): ?>
+                <div class="admin-table-wrapper">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <td><?php echo date('d/m/Y', strtotime($reg['data'])); ?></td>
-                                <td><?php echo number_format($reg['total'], 2); ?>L</td>
+                                <th>Data</th>
+                                <th>Quantidade (L)</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($registros_agua as $reg): ?>
+                                <tr>
+                                    <td><?php echo date('d/m/Y', strtotime($reg['data'])); ?></td>
+                                    <td><?php echo number_format($reg['total'], 2); ?>L</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php else: ?>
                 <p class="empty-message">
                     Nenhum registo de água encontrado.
@@ -323,24 +328,26 @@ $conn->close();
 
         <!-- Registos de Peso -->
         <div class="admin-section">
-            <h2><i class="fas fa-weight"></i> Registros de Peso (Últimos 30)</h2>
+            <h2><i class="fas fa-weight"></i> Registos de Peso (Últimos 30)</h2>
             <?php if (!empty($registros_peso)): ?>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Peso (kg)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($registros_peso as $reg): ?>
+                <div class="admin-table-wrapper">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <td><?php echo date('d/m/Y', strtotime($reg['data'])); ?></td>
-                                <td><?php echo number_format($reg['peso'], 1); ?> kg</td>
+                                <th>Data</th>
+                                <th>Peso (kg)</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($registros_peso as $reg): ?>
+                                <tr>
+                                    <td><?php echo date('d/m/Y', strtotime($reg['data'])); ?></td>
+                                    <td><?php echo number_format($reg['peso'], 1); ?> kg</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php else: ?>
                 <p class="empty-message">
                     Nenhum registo de peso encontrado.
@@ -352,26 +359,28 @@ $conn->close();
         <div class="admin-section">
             <h2><i class="fas fa-utensils"></i> Registos de Alimentação (Últimos 30)</h2>
             <?php if (!empty($registros_alimentacao)): ?>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Refeição</th>
-                            <th>Descrição</th>
-                            <th>Calorias</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($registros_alimentacao as $reg): ?>
+                <div class="admin-table-wrapper">
+                    <table class="data-table">
+                        <thead>
                             <tr>
-                                <td><?php echo date('d/m/Y', strtotime($reg['data'])); ?></td>
-                                <td><?php echo htmlspecialchars($reg['refeicao']); ?></td>
-                                <td><?php echo htmlspecialchars($reg['descricao']); ?></td>
-                                <td><?php echo number_format($reg['calorias'], 0); ?> kcal</td>
+                                <th>Data</th>
+                                <th>Refeição</th>
+                                <th>Descrição</th>
+                                <th>Calorias</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($registros_alimentacao as $reg): ?>
+                                <tr>
+                                    <td><?php echo date('d/m/Y', strtotime($reg['data'])); ?></td>
+                                    <td><?php echo htmlspecialchars($reg['refeicao']); ?></td>
+                                    <td><?php echo htmlspecialchars($reg['descricao']); ?></td>
+                                    <td><?php echo number_format($reg['calorias'], 0); ?> kcal</td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php else: ?>
                 <p class="empty-message">
                     Nenhum registo de alimentação encontrado.
@@ -381,12 +390,11 @@ $conn->close();
     </div>
 
     <nav class="navbar">
-        <a href="dashboard.php" class="nav-link"><i class="fas fa-home icon"></i> <span class="text">Início</span></a>
-        <a href="#" class="nav-link"><i class="fas fa-dumbbell icon"></i> <span class="text">Treinos</span></a>
-        <a href="progresso.php" class="nav-link"><i class="fas fa-chart-line icon"></i> <span
-                class="text">Progresso</span></a>
-        <a href="chatbot.php" class="nav-link"><i class="fas fa-robot icon"></i> <span class="text">Chatbot</span></a>
-        <a href="perfil.php" class="nav-link"><i class="fas fa-user icon"></i> <span class="text">Perfil</span></a>
+        <a href="dashboard.php" class="nav-link"><i class="fas fa-home icon"></i><span class="text">Início</span></a>
+        <a href="treinos.php" class="nav-link"><i class="fas fa-dumbbell icon"></i><span class="text">Treinos</span></a>
+        <a href="progresso.php" class="nav-link"><i class="fas fa-chart-line icon"></i><span class="text">Progresso</span></a>
+        <a href="chatbot.php" class="nav-link"><i class="fas fa-robot icon"></i><span class="text">Chatbot</span></a>
+        <a href="perfil.php" class="nav-link"><i class="fas fa-user icon"></i><span class="text">Perfil</span></a>
     </nav>
 </body>
 

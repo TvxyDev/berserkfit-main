@@ -45,8 +45,39 @@ if (isset($_GET['code'])) {
             $is_new_user = true;
             $username = NULL;
         }
+        $stmt->close();
 
-        // Definir sessões (igual ao login.php)
+        // ──────────────────────────────────────────────────────────────
+        // VERIFICAR 2FA — igual ao login normal
+        // Só faz sentido verificar para utilizadores existentes (não novos)
+        // ──────────────────────────────────────────────────────────────
+        if (!$is_new_user) {
+            $sql_2fa = "SELECT tfa_secret FROM user WHERE id_user = ?";
+            $stmt_2fa = $conn->prepare($sql_2fa);
+            $stmt_2fa->bind_param("i", $user_id);
+            $stmt_2fa->execute();
+            $result_2fa = $stmt_2fa->get_result();
+            $row_2fa = $result_2fa->fetch_assoc();
+            $stmt_2fa->close();
+
+            if (!empty($row_2fa['tfa_secret'])) {
+                // Tem 2FA ativo — guarda dados temporários e pede o código
+                // Importante: Limpamos o user_id para garantir que o login_2fa.php não o redirecione diretamente
+                unset($_SESSION['user_id']);
+                
+                $_SESSION['tfa_user_id']       = $user_id;
+                $_SESSION['tfa_username']      = $username;
+                $_SESSION['tfa_google_nome']   = $name;
+                $_SESSION['tfa_google_email']  = $email;
+                $_SESSION['tfa_google_login']  = true; // flag para saber que veio do Google
+                header("Location: login_2fa.php");
+                exit;
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // Sem 2FA (ou utilizador novo) — criar sessão completa
+        // ──────────────────────────────────────────────────────────────
         $_SESSION['user_id'] = $user_id;
         $_SESSION['user_nome'] = $name;
         $_SESSION['user_email'] = $email;
@@ -75,6 +106,7 @@ if (isset($_GET['code'])) {
         $stmt_check->execute();
         $result_check = $stmt_check->get_result();
         $row_check = $result_check->fetch_assoc();
+        $stmt_check->close();
 
         if ($row_check['total'] == 0) {
             header("Location: onboarding.php");

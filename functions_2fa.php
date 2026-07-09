@@ -121,3 +121,83 @@ function log_user_action($conn, $user_id, $action)
 {
     error_log("User $user_id: $action");
 }
+
+/**
+ * Gera um conjunto de códigos de backup aleatórios (8 caracteres + hífen)
+ * @param int $count Quantidade de códigos a gerar
+ * @return array Lista de códigos em texto simples
+ */
+function generate_backup_codes($count = 8)
+{
+    $codes = [];
+    for ($i = 0; $i < $count; $i++) {
+        // Formato: ABCD-1234
+        $code = strtoupper(bin2hex(random_bytes(2))) . '-' . strtoupper(bin2hex(random_bytes(2)));
+        $codes[] = $code;
+    }
+    return $codes;
+}
+
+/**
+ * Salva os códigos de backup na base de dados (em hash para segurança)
+ * @param mysqli $conn Conexão com a base de dados
+ * @param int $user_id ID do utilizador
+ * @param array $codes Lista de códigos em texto simples
+ */
+function save_backup_codes($conn, $user_id, $codes)
+{
+    $hashed_codes = array_map(function ($code) {
+        return password_hash($code, PASSWORD_DEFAULT);
+    }, $codes);
+
+    $json_codes = json_encode($hashed_codes);
+
+    $stmt = $conn->prepare("UPDATE user SET tfa_backup_codes = ? WHERE id_user = ?");
+    $stmt->bind_param("si", $json_codes, $user_id);
+    $stmt->execute();
+    $stmt->close();
+}
+
+/**
+ * Verifica se um código de backup é válido e o remove se for usado
+ * @param mysqli $conn Conexão com a base de dados
+ * @param int $user_id ID do utilizador
+ * @param string $input_code Código inserido pelo utilizador
+ * @return bool True se for válido
+ */
+function verify_and_use_backup_code($conn, $user_id, $input_code)
+{
+    $stmt = $conn->prepare("SELECT tfa_backup_codes FROM user WHERE id_user = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if (!$user || empty($user['tfa_backup_codes'])) {
+        return false;
+    }
+
+    $hashed_codes = json_decode($user['tfa_backup_codes'], true);
+    if (!is_array($hashed_codes)) return false;
+
+    foreach ($hashed_codes as $index => $hashed_code) {
+        if (password_verify(strtoupper($input_code), $hashed_code)) {
+            // Código válido! Remover da lista para não ser usado de novo
+            unset($hashed_codes[$index]);
+            $new_json = json_encode(array_values($hashed_codes));
+            
+            $update = $conn->prepare("UPDATE user SET tfa_backup_codes = ? WHERE id_user = ?");
+            if (!$update) return true; // Falhou a remover mas o código era válido
+
+            $update->bind_param("si", $new_json, $user_id);
+            $update->execute();
+            $update->close();
+            
+            return true;
+        }
+    }
+
+    return false;
+}
+

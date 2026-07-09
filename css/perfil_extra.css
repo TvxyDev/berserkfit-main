@@ -1,0 +1,218 @@
+/* Estilos adicionais para as novas estatísticas */
+.public-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-box {
+    background: var(--cor-fundo);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid var(--cor-secundaria);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.2s;
+}
+
+.stat-box:hover {
+    transform: translateY(-2px);
+    border-color: var(--cor-destaque);
+}
+
+.stat-box i {
+    font-size: 1.5rem;
+    color: var(--cor-destaque);
+    width: 30px;
+    text-align: center;
+}
+
+.stat-box div {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-box .stat-title {
+    font-size: 0.8rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.stat-box .stat-val {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--cor-texto);
+}
+
+.bio-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.bio-text {
+    color: var(--cor-texto);
+    font-size: 1rem;
+    line-height: 1.6;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.hidden-panel {
+    display: none;
+}
+
+/* Ajuste do botão secundário */
+.btn-cancel {
+    background-color: transparent;
+    color: #6b7280;
+    border: 1px solid #d1d5db;
+    margin-top: 10px;
+}
+
+.btn-cancel:hover {
+    background-color: #f3f4f6;
+    color: var(--cor-texto);
+}
+
+/* Botão de Configurações (Engrenagem) */
+.settings-icon-container {
+    position: relative;
+    text-align: right;
+    margin-bottom: -30px;
+    margin-right: 10px;
+    z-index: 10;
+}
+
+.btn-settings {
+    background: transparent;
+    color: #1c0c3b;
+    border: none;
+    width: auto;
+    height: auto;
+    display: inline-block;
+    font-size: 28px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-decoration: none;
+    box-shadow: none;
+    padding: 5px;
+}
+
+.btn-settings:hover {
+    background: transparent;
+    color: #4c1d95;
+    transform: rotate(90deg) scale(1.2);
+    filter: drop-shadow(0 0 5px rgba(28, 12, 59, 0.3));
+    box-shadow: none;
+}
+
+/* ═══ MODAL BERSERK (PARA PERFIL) ═══ */
+.modal-berserk {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: rgba(8, 4, 20, 0.85);
+    z-index: 100000;
+    align-items: center; 
+    justify-content: center;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    pointer-events: auto;
+}
+
+.modal-berserk.active { 
+    display: flex;
+    animation: modal-bg-fade 0.3s ease;
+}
+
+.modal-berserk .modal-content {
+    background: #1c0c3b; 
+    width: 95%; 
+    max-width: 450px;
+    margin: 0 auto;
+    border-radius: 28px; 
+    overflow: hidden;
+    border: 1px solid rgba(196, 181, 253, 0.2);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    transform: translateZ(0);
+    pointer-events: auto !important;
+    animation: modal-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+}
+
+.modal-berserk .modal-header {
+    padding: 20px 24px; 
+    border-bottom: 1px solid rgba(196, 181, 253, 0.08);
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    flex-shrink: 0;
+}
+
+.modal-berserk .modal-header h3 { 
+    font-family: 'Syne', sans-serif; 
+    font-size: 1.15rem; 
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #fff;
+    margin: 0;
+}
+
+.modal-berserk .modal-body { 
+    padding: 20px 24px; 
+    color: rgba(255, 255, 255, 0.9);
+    display: block !important;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.modal-berserk .modal-footer {
+    padding: 16px 24px 24px 24px;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid rgba(196, 181, 253, 0.05);
+    flex-shrink: 0;
+}
+
+/* Botão do modal */
+.modal-berserk .btn-save-modal {
+    background: linear-gradient(135deg, var(--cor-intermedia), var(--cor-destaque));
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+    text-decoration: none;
+}
+
+.modal-berserk .btn-save-modal:hover {
+    transform: scale(1.03) translateY(-1px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+@keyframes modal-bg-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modal-slide-up {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 $id_user = $_SESSION['user_id'];
 
 // Busca os dados do utilizador
-$sql = "SELECT tfa_secret, username, nome FROM user WHERE id_user = ?";
+$sql = "SELECT tfa_secret, username, nome, tipo_plano, data_expiracao_plano, stripe_customer_id FROM user WHERE id_user = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_user);
 $stmt->execute();
@@ -21,6 +21,35 @@ $user = $result->fetch_assoc();
 $stmt->close();
 
 $tfa_ativo = !empty($user['tfa_secret']);
+
+// Redirecionamento para o Portal de Faturação da Stripe
+$msg_erro = '';
+if (isset($_GET['action']) && $_GET['action'] === 'portal_stripe') {
+    require 'config_stripe.php';
+    require 'vendor/autoload.php';
+
+    if (!empty($user['stripe_customer_id'])) {
+        try {
+            \Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY);
+            $session = \Stripe\BillingPortal\Session::create([
+                'customer' => $user['stripe_customer_id'],
+                'return_url' => BASE_URL . 'configuracoes.php',
+            ]);
+            header("Location: " . $session->url);
+            exit;
+        } catch (\Exception $e) {
+            $msg_erro = "Erro ao carregar o portal da Stripe: " . $e->getMessage();
+        }
+    } else {
+        $msg_erro = "Ainda não tens uma assinatura ativa no Stripe.";
+    }
+}
+
+// Mensagem de sucesso ao voltar de alterar_senha.php
+$msg_sucesso = '';
+if (isset($_GET['msg']) && $_GET['msg'] === 'senha_alterada') {
+    $msg_sucesso = '✅ Palavra-passe alterada com sucesso!';
+}
 ?>
 
 <!DOCTYPE html>
@@ -31,167 +60,13 @@ $tfa_ativo = !empty($user['tfa_secret']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações - BerserkFit</title>
 
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/perfil.css">
+    <link rel="stylesheet" href="css/global.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/dashboard.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="css/perfil.css?v=<?= time() ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
-    <style>
-        .settings-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        .settings-header {
-            margin-bottom: 30px;
-        }
-
-        .settings-header h1 {
-            font-size: 2rem;
-            color: var(--cor-texto);
-            margin-bottom: 10px;
-        }
-
-        .settings-header p {
-            color: #6b7280;
-            font-size: 1rem;
-        }
-
-        .settings-section {
-            background: var(--cor-fundo);
-            border: 1px solid var(--cor-secundaria);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .settings-section:hover {
-            border-color: var(--cor-destaque);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .settings-section h2 {
-            font-size: 1.3rem;
-            color: var(--cor-texto);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .settings-section h2 i {
-            color: var(--cor-destaque);
-        }
-
-        .settings-section p {
-            color: #6b7280;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .settings-action {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(59, 130, 246, 0.05));
-            border: 1px solid rgba(6, 182, 212, 0.2);
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .settings-action-info {
-            flex: 1;
-        }
-
-        .settings-action-info h3 {
-            margin: 0 0 5px;
-            color: var(--cor-texto);
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .settings-action-info p {
-            margin: 0;
-            font-size: 0.85rem;
-            color: #888;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-
-        .badge-success {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
-        }
-
-        .badge-warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: #f59e0b;
-        }
-
-        .btn-primary {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #06b6d4, #3b82f6);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.3);
-        }
-
-        .btn-secondary {
-            padding: 10px 20px;
-            background: transparent;
-            color: var(--cor-texto);
-            border: 1px solid var(--cor-secundaria);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-secondary:hover {
-            background: var(--cor-secundaria);
-            transform: translateY(-2px);
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--cor-destaque);
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .back-link:hover {
-            gap: 12px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/configuracoes.css?v=<?= time() ?>">
 </head>
 
 <body>
@@ -205,6 +80,40 @@ $tfa_ativo = !empty($user['tfa_secret']);
             <div class="settings-header">
                 <h1><i class="fas fa-cog"></i> Configurações</h1>
                 <p>Gerencie as suas preferências e segurança da conta</p>
+            </div>
+
+            <?php if ($msg_sucesso): ?>
+                <div style="background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;padding:14px 18px;border-radius:10px;margin-bottom:20px;font-weight:500;">
+                    <?= htmlspecialchars($msg_sucesso) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($msg_erro): ?>
+                <div style="background:#fef2f2;border:1px solid #fecaca;color:#991b1b;padding:14px 18px;border-radius:10px;margin-bottom:20px;font-weight:500;">
+                    <?= htmlspecialchars($msg_erro) ?>
+                </div>
+            <?php endif; ?>
+
+            <!-- Seção de Subscrição -->
+            <div class="settings-section">
+                <h2><i class="fas fa-credit-card"></i> Subscrição</h2>
+                <p>Gere o teu plano e pagamentos do BerserkFit</p>
+
+                <?php 
+                $plano_atual = $user['tipo_plano'] ?? 'gratuito'; 
+                ?>
+
+                <div class="settings-action">
+                    <div class="settings-action-info">
+                        <h3>
+                            Plano Atual: <span style="text-transform: capitalize; color: var(--cor-acento); font-weight: 700;"><?= htmlspecialchars($plano_atual === 'gratuito' ? 'Spartan (Grátis)' : $plano_atual) ?></span>
+                        </h3>
+                        <p>Visualiza as vantagens dos planos, subscreve ou gere as tuas faturas.</p>
+                    </div>
+                    <a href="gerir_subscricao.php" class="btn-primary" style="text-decoration: none;">
+                        Gerir Subscrição
+                    </a>
+                </div>
             </div>
 
             <!-- Seção de Segurança -->
@@ -242,9 +151,9 @@ $tfa_ativo = !empty($user['tfa_secret']);
                         <h3>Alterar Palavra-passe</h3>
                         <p>Atualize a sua senha regularmente para manter a conta segura.</p>
                     </div>
-                    <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento')">
+                    <a href="alterar_senha.php" class="btn-primary">
                         Alterar Senha
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -274,7 +183,7 @@ $tfa_ativo = !empty($user['tfa_secret']);
                         <h3>Perfil Público</h3>
                         <p>Controle a visibilidade do seu perfil e estatísticas.</p>
                     </div>
-                    <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento')">
+                    <button class="btn-secondary" onclick="showCustomAlert('Privacidade', 'Esta funcionalidade de perfil privado está em desenvolvimento.')">
                         Configurar
                     </button>
                 </div>
@@ -290,7 +199,7 @@ $tfa_ativo = !empty($user['tfa_secret']);
                         <h3>Preferências de Notificação</h3>
                         <p>Configure email, push e outras notificações.</p>
                     </div>
-                    <button class="btn-secondary" onclick="alert('Funcionalidade em desenvolvimento')">
+                    <button class="btn-secondary" onclick="showCustomAlert('Notificações', 'As configurações avançadas de notificação estão em desenvolvimento.')">
                         Configurar
                     </button>
                 </div>
@@ -317,14 +226,13 @@ $tfa_ativo = !empty($user['tfa_secret']);
     </main>
 
     <nav class="navbar">
-        <a href="dashboard.php" class="nav-link"><i class="fas fa-home icon"></i> <span class="text">Início</span></a>
-        <a href="treinos.php" class="nav-link"><i class="fas fa-dumbbell icon"></i> <span
-                class="text">Treinos</span></a>
-        <a href="progresso.php" class="nav-link"><i class="fas fa-chart-line icon"></i> <span
-                class="text">Progresso</span></a>
-        <a href="chatbot.php" class="nav-link"><i class="fas fa-robot icon"></i> <span class="text">Chatbot</span></a>
-        <a href="perfil.php" class="nav-link"><i class="fas fa-user icon"></i> <span class="text">Perfil</span></a>
+        <a href="dashboard.php" class="nav-link"><i class="fas fa-home icon"></i><span class="text">Início</span></a>
+        <a href="treinos.php" class="nav-link"><i class="fas fa-dumbbell icon"></i><span class="text">Treinos</span></a>
+        <a href="progresso.php" class="nav-link"><i class="fas fa-chart-line icon"></i><span class="text">Progresso</span></a>
+        <a href="chatbot.php" class="nav-link"><i class="fas fa-robot icon"></i><span class="text">Chatbot</span></a>
+        <a href="perfil.php" class="nav-link"><i class="fas fa-user icon"></i><span class="text">Perfil</span></a>
     </nav>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
