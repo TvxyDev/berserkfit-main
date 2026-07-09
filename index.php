@@ -29,21 +29,21 @@ try {
   <meta name="description" content="BerserkFit é a tua aplicação inteligente de ginásio. Acompanha a tua evolução, gera treinos com IA, gere as tuas checklists diárias e constrói disciplina espartana." />
   <meta name="keywords" content="fitness, ginásio, app de treino, plano de treino, IA fitness, BerserkFit, musculação, evolução física, rotina de treino" />
   <meta name="author" content="BerserkFit" />
-  <link rel="canonical" href="https://teu-dominio-school.com/" /> <!-- Adaptar para o domínio real depois -->
+  <link rel="canonical" href="https://victorsantos.escolahenriquemedina.org/" /> <!-- Adaptar para o domínio real depois -->
 
   <!-- Open Graph / Facebook / WhatsApp -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://teu-dominio-school.com/" />
-  <meta property="og:title" content="BerserkFit | App de Treino, Evolução e Disciplina" />
-  <meta property="og:description" content="A tua aplicação de ginásio. Acompanha a tua evolução, treina com IA e constrói uma disciplina inabalável." />
-  <meta property="og:image" content="https://raw.githubusercontent.com/miguelsmuller/dev-berserkfit/main/assets/logotipo1.png" />
+  <meta property="og:url" content="https://victorsantos.escolahenriquemedina.org/" />
+  <meta property="og:title" content="BerserkFit - Forja a Tua Disciplina" />
+  <meta property="og:description" content="Junta-te ao BerserkFit. O ginásio não é só para o corpo, é para a mente." />
+  <meta property="og:image" content="https://victorsantos.escolahenriquemedina.org/assets/logotipo1.png" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:url" content="https://teu-dominio-school.com/" />
-  <meta property="twitter:title" content="BerserkFit | App de Treino, Evolução e Disciplina" />
-  <meta property="twitter:description" content="Gera planos de treino com IA, cria checklists diárias e participa da comunidade dos guerreiros." />
-  <meta property="twitter:image" content="https://raw.githubusercontent.com/miguelsmuller/dev-berserkfit/main/assets/logotipo1.png" />
+  <meta property="twitter:url" content="https://victorsantos.escolahenriquemedina.org/" />
+  <meta property="twitter:title" content="BerserkFit - Forja a Tua Disciplina" />
+  <meta property="twitter:description" content="Junta-te ao BerserkFit. O ginásio não é só para o corpo, é para a mente." />
+  <meta property="twitter:image" content="https://victorsantos.escolahenriquemedina.org/assets/logotipo1.png" />
   <link rel="stylesheet" href="css/estilo.css?v=<?= time() ?>" />
   <link rel="stylesheet" href="css/footer.css?v=<?= time() ?>" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
