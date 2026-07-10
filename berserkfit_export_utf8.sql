@@ -418,7 +418,7 @@ CREATE TABLE `pagamento` (
   PRIMARY KEY (`id_pagamento`),
   KEY `pagamento_id_user_foreign` (`id_user`),
   CONSTRAINT `pagamento_id_user_foreign` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -427,6 +427,7 @@ CREATE TABLE `pagamento` (
 
 LOCK TABLES `pagamento` WRITE;
 /*!40000 ALTER TABLE `pagamento` DISABLE KEYS */;
+INSERT INTO `pagamento` VALUES (1,3,'gladiator',19.90,'2026-06-01','stripe','cs_test_aaa111','sub_test_aaa111'),(2,19,'berserker',39.90,'2026-06-15','stripe','cs_test_bbb222','sub_test_bbb222'),(3,20,'gladiator',19.90,'2026-07-01','stripe','cs_test_ccc333','sub_test_ccc333'),(4,2,'berserker',39.90,'2026-07-05','stripe','cs_test_ddd444','sub_test_ddd444');
 /*!40000 ALTER TABLE `pagamento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -603,4 +604,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-10 14:41:30
+-- Dump completed on 2026-07-10 15:58:32
