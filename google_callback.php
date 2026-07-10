@@ -5,6 +5,10 @@ require_once 'ligacao.php';
 if (isset($_GET['code'])) {
     $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
 
+    if (isset($token['error'])) {
+        die("Erro na autenticação com a Google: " . htmlspecialchars($token['error']) . " - " . htmlspecialchars($token['error_description'] ?? ''));
+    }
+
     if (!isset($token['error'])) {
         $client->setAccessToken($token['access_token']);
 
