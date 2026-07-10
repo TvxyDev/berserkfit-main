@@ -685,6 +685,21 @@ $conn->close();
                             Nenhum registo de pagamento encontrado.
                         </p>
                     <?php endif; ?>
+                    <!-- Botão para ver logs do webhook -->
+                    <div style="margin-top: 25px; padding: 20px; background: rgba(196, 181, 253, 0.05); border: 1px solid rgba(196, 181, 253, 0.15); border-radius: 8px;">
+                        <h3 style="color: var(--cor-destaque-escuro); margin-bottom: 10px;"><i class="fas fa-file-alt"></i> Histórico de Logs do Webhook</h3>
+                        <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Aqui podes acompanhar as tentativas de ligação que a Stripe faz para o servidor da escola para registar os pagamentos.</p>
+                        <pre style="background: #18181b; color: #22c55e; padding: 15px; border-radius: 6px; overflow-x: auto; max-height: 250px; font-family: monospace; font-size: 0.85em; white-space: pre-wrap; word-break: break-all;"><?php
+                            $log_path = 'stripe_webhook_log.txt';
+                            if (file_exists($log_path)) {
+                                $logs = file($log_path);
+                                $last_logs = array_slice($logs, -30); // Últimas 30 linhas
+                                echo htmlspecialchars(implode("", $last_logs));
+                            } else {
+                                echo "Nenhum log registado até ao momento (ficheiro stripe_webhook_log.txt ainda não foi criado no servidor).";
+                            }
+                        ?></pre>
+                    </div>
                 </div>
             </section>
             <?php endif; ?>
