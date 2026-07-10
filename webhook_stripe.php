@@ -9,6 +9,10 @@ require 'ligacao.php';
 require 'config_stripe.php';
 require 'vendor/autoload.php';
 
+// Garantir que as colunas da Stripe existem na tabela pagamento (correção automática para o servidor da escola)
+$conn->query("ALTER TABLE pagamento ADD COLUMN IF NOT EXISTS stripe_checkout_session_id varchar(150) DEFAULT NULL");
+$conn->query("ALTER TABLE pagamento ADD COLUMN IF NOT EXISTS stripe_subscription_id varchar(150) DEFAULT NULL");
+
 // Caminho do log para depuração (tanto local como no servidor remoto)
 $log_file = 'stripe_webhook_log.txt';
 
