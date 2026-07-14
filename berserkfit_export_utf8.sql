@@ -160,7 +160,39 @@ CREATE TABLE `day_streak` (
 
 LOCK TABLES `day_streak` WRITE;
 /*!40000 ALTER TABLE `day_streak` DISABLE KEYS */;
-INSERT INTO `day_streak` VALUES (1,3,'2026-03-21',5,1),(8,3,'2026-03-22',5,1),(20,3,'2026-03-24',5,1),(125,19,'2026-07-08',5,1),(126,19,'2026-07-07',5,1),(127,19,'2026-07-06',5,1),(128,19,'2026-07-05',5,1),(129,19,'2026-07-04',5,1),(130,19,'2026-07-03',5,1),(131,19,'2026-07-02',5,1),(132,19,'2026-07-01',5,1),(133,19,'2026-06-30',5,1),(134,19,'2026-06-29',5,1),(135,19,'2026-06-28',5,1),(136,19,'2026-06-27',5,1),(137,20,'2026-07-08',5,1),(138,20,'2026-07-07',5,1),(139,20,'2026-07-06',5,1),(140,20,'2026-07-05',5,1),(141,20,'2026-07-04',5,1),(142,20,'2026-07-03',5,1),(143,20,'2026-07-02',5,1),(144,20,'2026-07-01',5,1),(145,20,'2026-06-30',5,1),(146,20,'2026-06-29',5,1),(147,20,'2026-06-28',5,1),(148,20,'2026-06-27',5,1),(150,19,'2026-07-09',5,1);
+INSERT INTO `day_streak` VALUES (1,3,'2026-03-21',5,1),(8,3,'2026-03-22',5,1),(20,3,'2026-03-24',5,1);
+-- Streaks Dinâmicos para Victor Santos (19) e Ragnar (20) que se adaptam à data atual do import
+INSERT INTO `day_streak` (`id_user`, `data_streak`, `desafios_concluidos`, `streak_valido`) VALUES 
+(19, CURDATE(), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 6 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 7 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 8 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 9 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 10 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 11 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 12 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 13 DAY), 5, 1),
+(19, DATE_SUB(CURDATE(), INTERVAL 14 DAY), 5, 1),
+(20, CURDATE(), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 2 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 3 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 4 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 5 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 6 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 7 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 8 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 9 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 10 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 11 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 12 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 13 DAY), 5, 1),
+(20, DATE_SUB(CURDATE(), INTERVAL 14 DAY), 5, 1);
 /*!40000 ALTER TABLE `day_streak` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -591,7 +623,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (2,'discord gg','discordggts8@gmail.com','$2y$10$KYSCAtvrxdx.MjTlq5Ma4Oov9YzeneH2CxmS0snR4Czgc2aBDYIU.','2026-01-16 09:23:37','gratuito',NULL,NULL,NULL,NULL,NULL,'Admin',NULL,'assets/fotos/default-user.png',0,'Renegado','teste123',NULL,NULL,NULL),(3,'Victor Hugo','victorhugoribeiro2609@gmail.com','$2y$10$DYFdg5O5JxKI0onZIDN7Ye1aHklVNbThAHeqSnrkIwkUvrySjUKDu','2026-01-16 09:55:40','gratuito',NULL,'','','0000-00-00','Masculino','SuperAdmin','assets/fotos/1774345821_wp3616395-audi-4k-wallpapers.jpg','assets/fotos/default-user.png',0,'Renegado','victor260906',NULL,NULL,NULL),(19,'Victor Santos','papvictorsantos@gmail.com','$2y$10$Bs2DvpcfTsCd03C0JzJRbuENZkEXk2qc6siNilyuUr.eUtfTQtegi','2026-07-08 15:43:18','gladiator',NULL,NULL,NULL,NULL,NULL,'Usuario','assets/fotos/default-user.png','assets/fotos/default-user.png',13,'Huscarl','victorsantos',NULL,NULL,NULL),(20,'Ragnar Lothbrok','ragnar@example.com','$2y$10$8FoPrYxS.VQoJlXSBuqeXurUFoIHK56ltgXAt8trpyoiAdEnPXBii','2026-07-08 15:43:19','gratuito',NULL,NULL,NULL,NULL,NULL,'Usuario','assets/fotos/default-user.png','assets/fotos/default-user.png',15,'Huscarl','ragnarlothbrok',NULL,NULL,NULL);
+INSERT INTO `user` VALUES (2,'discord gg','discordggts8@gmail.com','$2y$10$KYSCAtvrxdx.MjTlq5Ma4Oov9YzeneH2CxmS0snR4Czgc2aBDYIU.','2026-01-16 09:23:37','gratuito',NULL,NULL,NULL,NULL,NULL,'Admin',NULL,'assets/fotos/default-user.png',0,'Renegado','teste123',NULL,NULL,NULL),(3,'Victor Hugo','victorhugoribeiro2609@gmail.com','$2y$10$DYFdg5O5JxKI0onZIDN7Ye1aHklVNbThAHeqSnrkIwkUvrySjUKDu','2026-01-16 09:55:40','gratuito',NULL,'','','0000-00-00','Masculino','SuperAdmin','assets/fotos/1774345821_wp3616395-audi-4k-wallpapers.jpg','assets/fotos/default-user.png',0,'Renegado','victor260906',NULL,NULL,NULL),(19,'Victor Santos','papvictorsantos@gmail.com','$2y$10$Bs2DvpcfTsCd03C0JzJRbuENZkEXk2qc6siNilyuUr.eUtfTQtegi','2026-07-08 15:43:18','gladiator',NULL,NULL,NULL,NULL,NULL,'Usuario','assets/fotos/default-user.png','assets/fotos/default-user.png',15,'Jarl','victorsantos',NULL,NULL,NULL),(20,'Ragnar Lothbrok','ragnar@example.com','$2y$10$8FoPrYxS.VQoJlXSBuqeXurUFoIHK56ltgXAt8trpyoiAdEnPXBii','2026-07-08 15:43:19','gratuito',NULL,NULL,NULL,NULL,NULL,'Usuario','assets/fotos/default-user.png','assets/fotos/default-user.png',15,'Jarl','ragnarlothbrok',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
